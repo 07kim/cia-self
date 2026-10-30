@@ -1,0 +1,2 @@
+# Repository instructions
+Read `docs/PRODUCT_SPEC.md`, `docs/ARCHITECTURE.md`, `PLANS.md`, and `CHANGELOG.md` before changes. Product behavior belongs in the product spec; technical boundaries belong in architecture. Keep all event data local and offline-capable. Never add 四ツ谷 to purchase history. The evidence transaction must remain `20:15 / 一ノ瀬 なつき / 0719 / ¥580`. Update docs and changelog with behavior changes. Verify type checking, tests, and production build before publishing.

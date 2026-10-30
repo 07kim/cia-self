@@ -1,0 +1,9 @@
+{
+  "name": "CIA MART Self Checkout",
+  "short_name": "CIA SELF",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#f4f4ef",
+  "theme_color": "#0f5e4f"
+}
