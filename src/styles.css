@@ -78,7 +78,7 @@ button { cursor: pointer; }
   grid-template-rows: 1fr auto;
   gap: 30px;
   padding: clamp(32px, 5vh, 64px) clamp(28px, 5vw, 78px) 32px;
-  background: #f6f8fa;
+  background: #fff;
 }
 .homeCopy {
   position: relative;
@@ -86,22 +86,24 @@ button { cursor: pointer; }
   min-height: 450px;
   padding: 38px 38px 220px;
   overflow: hidden;
-  border: 1px solid var(--line);
-  border-radius: 26px;
-  background: #fff;
-  box-shadow: 0 18px 50px #243b5012;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
 .compactBrand { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; color: var(--blue-dark); }
 .compactBrand > i { width: 18px; height: 18px; background: var(--blue); clip-path: polygon(50% 0, 100% 100%, 0 100%); }
 .compactBrand > b { font-size: 16px; font-weight: 900; }
 .compactBrand > small { margin-left: 4px; padding-left: 13px; border-left: 1px solid #c7d3de; color: #6d7e8f; font-size: 10px; font-weight: 900; letter-spacing: .12em; }
 .homeCopy h1 {
-  margin: 0;
-  font-size: clamp(32px, 3.1vw, 44px);
+  margin: 7px 0 0;
+  color: var(--blue-dark);
+  font-size: clamp(42px, 5vw, 72px);
   line-height: 1.05;
   letter-spacing: -.045em;
   white-space: nowrap;
 }
+.welcome { color: #607486; font-size: 14px; font-weight: 900; }
 .homeCopy p {
   margin: 24px 0 0;
   color: #566779;
@@ -116,6 +118,7 @@ button { cursor: pointer; }
   display: grid;
   place-items: center;
   overflow: hidden;
+  border-radius: 22px;
   background: #eaf3ff;
 }
 .homeVisual::before {
@@ -239,9 +242,9 @@ button { cursor: pointer; }
   gap: 14px;
   align-items: center;
   padding: 16px 18px;
-  border: 1px solid #cfdae3;
+  border: 0;
   border-radius: 16px;
-  background: #fff;
+  background: #eef3f7;
   color: #263a4e;
   text-align: left;
   transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
@@ -271,20 +274,21 @@ button { cursor: pointer; }
 .homeGuide {
   grid-column: 1 / -1;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   overflow: hidden;
-  border: 1px solid var(--line);
-  border-radius: 18px;
-  background: #fff;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
 }
 .homeGuide div {
   display: flex;
   align-items: center;
   gap: 16px;
   padding: 20px 26px;
-  border-right: 1px solid var(--line);
+  border-top: 1px solid var(--line);
+  border-right: 0;
 }
-.homeGuide div:last-child { border: 0; }
+.homeGuide div:last-child { border-top: 1px solid var(--line); }
 .homeGuide > div > b {
   display: grid;
   width: 40px;
@@ -503,10 +507,11 @@ button { cursor: pointer; }
 .kioskProgress {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  overflow: hidden;
-  border: 1px solid #cdd8e2;
-  border-radius: 14px;
-  background: #fff;
+  overflow: visible;
+  border: 0;
+  border-bottom: 1px solid #cdd8e2;
+  border-radius: 0;
+  background: transparent;
 }
 .kioskProgress span {
   position: relative;
@@ -515,15 +520,15 @@ button { cursor: pointer; }
   align-items: center;
   justify-content: center;
   gap: 9px;
-  border-right: 1px solid #dbe3e9;
+  border-right: 0;
   color: #7a8996;
   font-size: 13px;
   font-weight: 900;
 }
 .kioskProgress span:last-child { border: 0; }
 .kioskProgress i { display: grid; width: 26px; aspect-ratio: 1; place-items: center; border-radius: 8px; background: #edf1f4; font-style: normal; }
-.kioskProgress .current { background: var(--blue); color: #fff; }
-.kioskProgress .current i { background: #fff; color: var(--blue); }
+.kioskProgress .current { color: var(--blue); box-shadow: inset 0 -4px var(--blue); }
+.kioskProgress .current i { background: var(--blue); color: #fff; }
 .kioskProgress .done { color: var(--blue-dark); }
 .kioskProgress .done i { background: #dcecff; color: var(--blue); }
 
@@ -533,7 +538,7 @@ button { cursor: pointer; }
   grid-template-rows: auto 1fr auto;
   gap: 22px;
   padding: clamp(20px, 4vw, 46px);
-  background: #e9eef2;
+  background: #fff;
 }
 .choiceCard {
   width: min(1120px, 100%);
@@ -543,10 +548,10 @@ button { cursor: pointer; }
   grid-template-columns: minmax(250px, .55fr) minmax(520px, 1.45fr);
   gap: clamp(22px, 4vw, 60px);
   align-items: center;
-  padding: clamp(28px, 5vw, 58px);
-  border: 1px solid #cbd6df;
-  border-radius: 24px;
-  background: #fff;
+  padding: clamp(20px, 4vw, 44px) 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
 }
 .choiceHeading span { color: var(--blue); font-size: 11px; font-weight: 900; letter-spacing: .12em; }
 .choiceHeading h1 { margin: 14px 0 6px; color: var(--navy); font-size: clamp(36px, 5vw, 64px); }
@@ -804,7 +809,9 @@ button { cursor: pointer; }
   .startButton > b { flex-basis: 52px; }
   .menuButton, .menuButton.display { grid-column: 1; }
   .homeGuide { grid-template-columns: 1fr; }
-  .homeGuide div { border-right: 0; border-bottom: 1px solid var(--line); }
+  .homeGuide div { border-top: 0; border-right: 0; border-bottom: 1px solid var(--line); }
+  .homeGuide div:first-child { border-top: 1px solid var(--line); }
+  .homeGuide div:last-child { border-top: 0; }
   .checkoutGrid { grid-template-columns: 1fr; grid-template-rows: auto auto auto 60px; padding: 12px; }
   .checkoutGrid > .kioskProgress { grid-column: 1; }
   .cameraFrame { height: 340px; }

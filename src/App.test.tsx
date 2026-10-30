@@ -20,6 +20,7 @@ describe('self checkout', () => {
 
   it('completes the staged checkout and adds a registered item', async () => {
     render(<App />)
+    expect(screen.getByRole('heading', { name: 'セルフレジ' })).toBeInTheDocument()
     expect(screen.getByText('いらっしゃいませ')).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: /お買い物を始める/ }))

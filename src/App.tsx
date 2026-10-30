@@ -257,8 +257,9 @@ export function App() {
             <section className="homeScreen">
               <div className="homeCopy">
                 <div className="compactBrand"><i /><b>CIA MART</b><small>SELF CHECKOUT</small></div>
-                <h1>いらっしゃいませ</h1>
-                <p>商品のバーコードをカメラにかざして<br />お買い物を始めてください。</p>
+                <span className="welcome">いらっしゃいませ</span>
+                <h1>セルフレジ</h1>
+                <p>画面の案内に沿って<br />お会計をはじめてください。</p>
                 <div className="homeVisual" aria-hidden="true">
                   <div className="productShape"><i /><i /><i /></div>
                   <div className="scanBeam" />
@@ -295,9 +296,10 @@ export function App() {
                 </button>
               </div>
               <div className="homeGuide">
-                <div><b>1</b><span><small>SCAN</small>バーコードをかざす</span></div>
-                <div><b>2</b><span><small>CHECK</small>商品・点数を確認</span></div>
-                <div><b>3</b><span><small>PAY</small>内容を確認して次へ</span></div>
+                <div><b>1</b><span><small>POINT</small>ポイント</span></div>
+                <div><b>2</b><span><small>BAG</small>レジ袋</span></div>
+                <div><b>3</b><span><small>PAY</small>支払方法</span></div>
+                <div><b>4</b><span><small>SCAN</small>商品登録</span></div>
               </div>
             </section>
           ) : screen === 'checkout' ? (
