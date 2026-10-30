@@ -6,17 +6,38 @@ import {
   type ScannerSession,
   type ScannerState,
 } from './barcode-scanner'
-import { findProduct, type Product } from './catalog'
+import { findProduct, products, type Product } from './catalog'
 import { searchTransactions, total, type Transaction } from './data'
 
-type Screen = 'home' | 'checkout' | 'lock' | 'history'
+type Screen = 'home' | 'points' | 'bag' | 'payment' | 'checkout' | 'complete' | 'lock' | 'employee' | 'history'
 type Corner = 'tl' | 'tr' | 'br' | 'bl'
 type HomeDialog = 'manual' | 'guide' | 'staff' | 'language' | null
+type EmployeeView = 'menu' | 'catalog' | 'terminal' | 'settings'
 type CartLine = Product & { qty: number }
 type Feedback = { tone: 'success' | 'error'; title: string; detail: string } | null
 
 const corners: Corner[] = ['tl', 'tr', 'bl', 'br']
 const Z_SEQUENCE_LIMIT_MS = 1_500
+
+function KioskProgress({ current }: { current: 'points' | 'bag' | 'payment' | 'checkout' | 'complete' }) {
+  const steps = [
+    ['points', 'ポイント'],
+    ['bag', 'レジ袋'],
+    ['payment', '支払方法'],
+    ['checkout', '商品登録'],
+    ['complete', '完了'],
+  ] as const
+  const currentIndex = steps.findIndex(([id]) => id === current)
+  return (
+    <nav aria-label="お会計の進行" className="kioskProgress">
+      {steps.map(([id, label], index) => (
+        <span className={index === currentIndex ? 'current' : index < currentIndex ? 'done' : ''} key={id}>
+          <i>{index < currentIndex ? '✓' : index + 1}</i>{label}
+        </span>
+      ))}
+    </nav>
+  )
+}
 
 export function App() {
   const [screen, setScreen] = useState<Screen>('home')
@@ -31,6 +52,10 @@ export function App() {
   const [dialog, setDialog] = useState<HomeDialog>(null)
   const [manualCode, setManualCode] = useState('')
   const [largeText, setLargeText] = useState(false)
+  const [pointChoice, setPointChoice] = useState('未選択')
+  const [bagChoice, setBagChoice] = useState('未選択')
+  const [paymentChoice, setPaymentChoice] = useState('未選択')
+  const [employeeView, setEmployeeView] = useState<EmployeeView>('menu')
   const timer = useRef<number>(0)
   const feedbackTimer = useRef<number>(0)
   const sequenceTimer = useRef<number>(0)
@@ -55,6 +80,10 @@ export function App() {
     setFeedback(null)
     setDialog(null)
     setManualCode('')
+    setPointChoice('未選択')
+    setBagChoice('未選択')
+    setPaymentChoice('未選択')
+    setEmployeeView('menu')
     window.clearTimeout(sequenceTimer.current)
     sequenceRef.current = 0
     lastCornerInput.current = { corner: null, at: Number.NEGATIVE_INFINITY }
@@ -64,7 +93,10 @@ export function App() {
     if (screen === 'home') return
     const reset = () => {
       window.clearTimeout(timer.current)
-      timer.current = window.setTimeout(goHome, screen === 'checkout' ? 60_000 : 10_000)
+      timer.current = window.setTimeout(
+        goHome,
+        ['points', 'bag', 'payment', 'checkout', 'complete'].includes(screen) ? 60_000 : 10_000,
+      )
     }
     reset()
     const events = ['pointerdown', 'keydown', 'input']
@@ -160,15 +192,16 @@ export function App() {
 
   const beginCheckout = () => {
     void unlock().then(() => play('tap'))
-    setScannerState('requesting-permission')
     setDialog(null)
-    setScreen('checkout')
+    setScreen('points')
   }
 
   const submitManualCode = () => {
     const code = manualCode.normalize('NFKC').replace(/\s/g, '')
     if (!code) return
-    beginCheckout()
+    void unlock().then(() => play('tap'))
+    setDialog(null)
+    setScreen('points')
     onBarcode(code)
     setManualCode('')
   }
@@ -176,7 +209,7 @@ export function App() {
   const authenticate = () => {
     if (answer.normalize('NFKC').trim() === 'ばいてん') {
       play('granted')
-      setScreen('history')
+      setScreen('employee')
       setAnswer('')
       setDenied(false)
     } else {
@@ -193,13 +226,32 @@ export function App() {
       .filter((line) => line.qty > 0))
   }
 
+  const choosePoint = (choice: string) => {
+    play('tap')
+    setPointChoice(choice)
+    setScreen('bag')
+  }
+
+  const chooseBag = (choice: string) => {
+    play('tap')
+    setBagChoice(choice)
+    setScreen('payment')
+  }
+
+  const choosePayment = (choice: string) => {
+    play('tap')
+    setPaymentChoice(choice)
+    setScannerState('requesting-permission')
+    setScreen('checkout')
+  }
+
   const cartTotal = cart.reduce((sum, line) => sum + line.price * line.qty, 0)
   const cartCount = cart.reduce((sum, line) => sum + line.qty, 0)
   const results = searchTransactions(query)
 
   return (
     <main className={`app ${screen}${largeText ? ' largeText' : ''}`}>
-      {(screen === 'home' || screen === 'checkout') ? (
+      {(['home', 'points', 'bag', 'payment', 'checkout', 'complete'] as Screen[]).includes(screen) ? (
         <>
           {screen === 'home' ? (
             <section className="homeScreen">
@@ -248,8 +300,9 @@ export function App() {
                 <div><b>3</b><span><small>PAY</small>内容を確認して次へ</span></div>
               </div>
             </section>
-          ) : (
+          ) : screen === 'checkout' ? (
             <section className="checkoutGrid">
+              <KioskProgress current="checkout" />
               <section className="scanPanel">
                 <header>
                   <span><small>STEP 1</small>商品を読み取る</span>
@@ -266,6 +319,14 @@ export function App() {
                     </div>
                   ) : null}
                   <div className="cameraStatus"><i />{scannerState === 'scanning' ? '読取待機中' : 'カメラ確認中'}</div>
+                </div>
+                <div className="quickProducts">
+                  <span>商品選択</span>
+                  {products.slice(0, 4).map((product) => (
+                    <button key={product.barcode} onClick={() => onBarcode(product.barcode)} type="button">
+                      <i aria-hidden="true">{product.name.slice(0, 1)}</i><b>{product.name}</b><small>¥{product.price}</small>
+                    </button>
+                  ))}
                 </div>
                 <p>商品のJANコード、またはCIA MARTの商品コードをカメラへ向けてください。</p>
               </section>
@@ -293,13 +354,13 @@ export function App() {
                 </div>
                 <footer>
                   <div><span>合計（税込）</span><strong>¥{cartTotal.toLocaleString()}</strong></div>
-                  <button disabled={!cart.length} onClick={() => play('complete')} type="button">内容を確認する</button>
+                  <button disabled={!cart.length} onClick={() => { play('complete'); setScreen('complete') }} type="button">お会計を確定</button>
                 </footer>
               </section>
 
               <footer className="checkoutFooter">
                 <button onClick={goHome} type="button">はじめに戻る</button>
-                <span>お困りの場合は係員をお呼びください</span>
+                <span>ポイント: {pointChoice} / レジ袋: {bagChoice} / 支払: {paymentChoice}</span>
                 <button onClick={() => setDialog('staff')} type="button">係員を呼ぶ</button>
               </footer>
 
@@ -309,6 +370,60 @@ export function App() {
                   <span><b>{feedback.title}</b><small>{feedback.detail}</small></span>
                 </div>
               ) : null}
+            </section>
+          ) : screen === 'complete' ? (
+            <section className="completeScreen">
+              <KioskProgress current="complete" />
+              <div className="completeCard">
+                <i aria-hidden="true">✓</i>
+                <span>お会計完了</span>
+                <h1>ありがとうございました</h1>
+                <dl>
+                  <div><dt>点数</dt><dd>{cartCount}点</dd></div>
+                  <div><dt>レジ袋</dt><dd>{bagChoice}</dd></div>
+                  <div><dt>支払</dt><dd>{paymentChoice}</dd></div>
+                  <div><dt>合計</dt><dd>¥{cartTotal.toLocaleString()}</dd></div>
+                </dl>
+                <button onClick={goHome} type="button">はじめに戻る</button>
+              </div>
+            </section>
+          ) : (
+            <section className="choiceScreen">
+              <KioskProgress current={screen as 'points' | 'bag' | 'payment'} />
+              <div className="choiceCard">
+                <div className="choiceHeading">
+                  <span>CIA MART / SELF CHECKOUT</span>
+                  <h1>{screen === 'points' ? 'ポイント' : screen === 'bag' ? 'レジ袋' : '支払方法'}</h1>
+                  <p>{screen === 'points' ? 'ポイントカードを選択' : screen === 'bag' ? '必要なレジ袋を選択' : 'お支払い方法を選択'}</p>
+                </div>
+                <div className="choiceTiles">
+                  {screen === 'points' ? (
+                    <>
+                      <button onClick={() => choosePoint('貯める')} type="button"><i>＋P</i><b>貯める</b><small>ポイント付与</small></button>
+                      <button onClick={() => choosePoint('使う')} type="button"><i>−P</i><b>使う</b><small>ポイント利用</small></button>
+                      <button className="neutral" onClick={() => choosePoint('利用しない')} type="button"><i>—</i><b>利用しない</b><small>次へ</small></button>
+                    </>
+                  ) : screen === 'bag' ? (
+                    <>
+                      <button onClick={() => chooseBag('小 1枚')} type="button"><i>袋</i><b>小</b><small>1枚 / ¥3</small></button>
+                      <button onClick={() => chooseBag('大 1枚')} type="button"><i>袋</i><b>大</b><small>1枚 / ¥5</small></button>
+                      <button className="neutral" onClick={() => chooseBag('不要')} type="button"><i>×</i><b>不要</b><small>袋なし</small></button>
+                    </>
+                  ) : (
+                    <>
+                      <button onClick={() => choosePayment('クレジットカード')} type="button"><i>▣</i><b>クレジット</b><small>カード</small></button>
+                      <button onClick={() => choosePayment('交通系IC')} type="button"><i>IC</i><b>交通系IC</b><small>タッチ決済</small></button>
+                      <button onClick={() => choosePayment('コード決済')} type="button"><i>▦</i><b>コード決済</b><small>QR・バーコード</small></button>
+                      <button onClick={() => choosePayment('現金')} type="button"><i>¥</i><b>現金</b><small>紙幣・硬貨</small></button>
+                    </>
+                  )}
+                </div>
+              </div>
+              <footer className="choiceFooter">
+                <button onClick={() => setScreen(screen === 'points' ? 'home' : screen === 'bag' ? 'points' : 'bag')} type="button">戻る</button>
+                <div><span>ポイント</span><b>{pointChoice}</b><span>レジ袋</span><b>{bagChoice}</b></div>
+                <button onClick={() => setDialog('staff')} type="button">係員</button>
+              </footer>
             </section>
           )}
 
@@ -346,7 +461,7 @@ export function App() {
                 {dialog === 'guide' ? (
                   <>
                     <span>HOW TO USE</span><h2>セルフレジの使い方</h2>
-                    <ol><li><b>1</b>「お買い物を始める」をタッチ</li><li><b>2</b>商品のバーコードをカメラにかざす</li><li><b>3</b>商品と点数を確認して次へ進む</li></ol>
+                    <ol><li><b>1</b>ポイント・レジ袋・支払方法を選択</li><li><b>2</b>カメラまたは商品ボタンで商品を登録</li><li><b>3</b>商品と点数を確認して会計を確定</li></ol>
                     <button className="dialogPrimary" onClick={beginCheckout} type="button">お買い物を始める</button>
                   </>
                 ) : null}
@@ -383,9 +498,39 @@ export function App() {
         </section>
       ) : null}
 
+      {screen === 'employee' ? (
+        <section className="employeeMode">
+          <header>
+            <div><span>CIA MART / STAFF CONSOLE</span><h1>従業員モード</h1></div>
+            <button onClick={goHome} type="button">セルフレジへ戻る</button>
+          </header>
+          {employeeView === 'menu' ? (
+            <div className="employeeTiles">
+              <button onClick={() => setScreen('history')} type="button"><i>履</i><b>購入履歴</b><small>取引・商品明細</small></button>
+              <button onClick={() => setEmployeeView('catalog')} type="button"><i>品</i><b>商品台帳</b><small>価格・商品コード</small></button>
+              <button onClick={() => setEmployeeView('terminal')} type="button"><i>端</i><b>端末状態</b><small>カメラ・通信・音声</small></button>
+              <button onClick={() => setEmployeeView('settings')} type="button"><i>設</i><b>取引設定</b><small>会計フロー・税率</small></button>
+            </div>
+          ) : (
+            <div className="employeePanel">
+              <button className="employeeBack" onClick={() => setEmployeeView('menu')} type="button">← 従業員メニュー</button>
+              {employeeView === 'catalog' ? (
+                <><span>PRODUCT MASTER</span><h2>商品台帳</h2><div className="catalogList">{products.map((product) => <div key={product.barcode}><i className={product.category}>{product.name.slice(0, 1)}</i><span><b>{product.name}</b><small>{product.barcode}</small></span><strong>¥{product.price}</strong></div>)}</div></>
+              ) : null}
+              {employeeView === 'terminal' ? (
+                <><span>TERMINAL STATUS</span><h2>端末状態</h2><div className="statusTiles"><div><b>カメラ</b><strong>READY</strong></div><div><b>商品台帳</b><strong>{products.length} ITEMS</strong></div><div><b>効果音</b><strong>{muted ? 'OFF' : 'ON'}</strong></div><div><b>データ</b><strong>LOCAL</strong></div></div></>
+              ) : null}
+              {employeeView === 'settings' ? (
+                <><span>TRANSACTION SETTINGS</span><h2>取引設定</h2><div className="settingsList"><div><b>会計フロー</b><span>ポイント → レジ袋 → 支払方法 → 商品登録</span></div><div><b>消費税</b><span>軽減8% / 標準10%</span></div><div><b>履歴保存</b><span>イベント固定データ</span></div></div></>
+              ) : null}
+            </div>
+          )}
+        </section>
+      ) : null}
+
       {screen === 'history' ? (
         <section className="admin">
-          <header><div><span>CIA MART / BACK OFFICE</span><h1>購入履歴</h1></div><button onClick={goHome}>セルフレジへ戻る</button></header>
+          <header><div><span>CIA MART / STAFF CONSOLE</span><h1>購入履歴</h1></div><button onClick={() => setScreen('employee')}>従業員メニュー</button></header>
           <div className="toolbar"><input aria-label="履歴検索" onChange={(event) => setQuery(event.target.value)} placeholder="氏名または社員IDで検索" value={query} /><b>{results.length}件</b></div>
           <div className="history">
             <div className="table">

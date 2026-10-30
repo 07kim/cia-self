@@ -18,14 +18,20 @@ describe('self checkout', () => {
     })
   })
 
-  it('adds a registered barcode to the cart without inventing an item first', async () => {
+  it('completes the staged checkout and adds a registered item', async () => {
     render(<App />)
     expect(screen.getByText('いらっしゃいませ')).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: /お買い物を始める/ }))
+    expect(screen.getByRole('heading', { name: 'ポイント' })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /利用しない/ }))
+    fireEvent.click(screen.getByRole('button', { name: /不要/ }))
+    fireEvent.click(screen.getByRole('button', { name: /クレジット/ }))
 
     expect(await screen.findAllByText('梅おにぎり')).toHaveLength(2)
     expect(screen.getAllByText((_, element) => element?.textContent === '¥160').length).toBeGreaterThan(0)
+    fireEvent.click(screen.getByRole('button', { name: 'お会計を確定' }))
+    expect(screen.getByRole('heading', { name: 'ありがとうございました' })).toBeInTheDocument()
   })
 
   it('opens every home support menu and changes display mode', () => {
@@ -86,6 +92,21 @@ describe('self checkout', () => {
     }
 
     expect(screen.getByRole('heading', { name: 'システムパスワード' })).toBeInTheDocument()
+  })
+
+  it('opens the employee mode before purchase history', () => {
+    render(<App />)
+
+    for (const corner of ['tl', 'tr', 'bl', 'br']) {
+      fireEvent.pointerDown(screen.getByRole('button', { name: `hidden-${corner}` }))
+    }
+    fireEvent.change(screen.getByRole('textbox', { name: 'システムパスワード' }), { target: { value: 'ばいてん' } })
+    fireEvent.click(screen.getByRole('button', { name: '認証' }))
+
+    expect(screen.getByRole('heading', { name: '従業員モード' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /商品台帳/ })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /購入履歴/ }))
+    expect(screen.getByRole('heading', { name: '購入履歴' })).toBeInTheDocument()
   })
 
   it('allows up to 1.5 seconds between each Z touch', () => {
