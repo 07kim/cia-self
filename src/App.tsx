@@ -16,6 +16,7 @@ type CartLine = Product & { qty: number }
 type Feedback = { tone: 'success' | 'error'; title: string; detail: string } | null
 
 const corners: Corner[] = ['tl', 'tr', 'br', 'bl']
+const Z_SEQUENCE_LIMIT_MS = 1_500
 
 export function App() {
   const [screen, setScreen] = useState<Screen>('home')
@@ -32,6 +33,7 @@ export function App() {
   const [largeText, setLargeText] = useState(false)
   const timer = useRef<number>(0)
   const feedbackTimer = useRef<number>(0)
+  const sequenceTimer = useRef<number>(0)
   const videoRef = useRef<HTMLVideoElement>(null)
   const scanner = useRef<ScannerSession | null>(null)
   const lastRead = useRef({ code: '', at: 0 })
@@ -52,6 +54,7 @@ export function App() {
     setFeedback(null)
     setDialog(null)
     setManualCode('')
+    window.clearTimeout(sequenceTimer.current)
     sequenceRef.current = 0
   }, [])
 
@@ -73,6 +76,7 @@ export function App() {
   useEffect(() => () => {
     scanner.current?.stop()
     window.clearTimeout(feedbackTimer.current)
+    window.clearTimeout(sequenceTimer.current)
   }, [])
 
   const announce = useCallback((next: Exclude<Feedback, null>) => {
@@ -128,11 +132,20 @@ export function App() {
     sequenceRef.current = next
     setSequence(next)
     if (next === 4) {
+      window.clearTimeout(sequenceTimer.current)
       scanner.current?.stop()
       scanner.current = null
       setSequence(0)
       sequenceRef.current = 0
       setScreen('lock')
+    } else if (next === 1) {
+      window.clearTimeout(sequenceTimer.current)
+      sequenceTimer.current = window.setTimeout(() => {
+        sequenceRef.current = 0
+        setSequence(0)
+      }, Z_SEQUENCE_LIMIT_MS)
+    } else if (next === 0) {
+      window.clearTimeout(sequenceTimer.current)
     }
   }
 

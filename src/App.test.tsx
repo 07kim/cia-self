@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { act, fireEvent, render, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const startBarcodeScanner = vi.fn()
@@ -64,5 +64,25 @@ describe('self checkout', () => {
     }
 
     expect(screen.getByRole('heading', { name: 'システムパスワード' })).toBeInTheDocument()
+  })
+
+  it('resets an unfinished Z touch sequence after 1.5 seconds', () => {
+    vi.useFakeTimers()
+    render(<App />)
+
+    fireEvent.pointerDown(screen.getByRole('button', { name: 'hidden-tl' }))
+    act(() => vi.advanceTimersByTime(500))
+    fireEvent.pointerDown(screen.getByRole('button', { name: 'hidden-tr' }))
+    act(() => vi.advanceTimersByTime(500))
+    fireEvent.pointerDown(screen.getByRole('button', { name: 'hidden-br' }))
+    act(() => vi.advanceTimersByTime(501))
+    fireEvent.pointerDown(screen.getByRole('button', { name: 'hidden-bl' }))
+    expect(screen.queryByRole('heading', { name: 'システムパスワード' })).not.toBeInTheDocument()
+
+    for (const corner of ['tl', 'tr', 'br', 'bl']) {
+      fireEvent.pointerDown(screen.getByRole('button', { name: `hidden-${corner}` }))
+    }
+    expect(screen.getByRole('heading', { name: 'システムパスワード' })).toBeInTheDocument()
+    vi.useRealTimers()
   })
 })
