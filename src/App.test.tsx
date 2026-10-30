@@ -66,23 +66,31 @@ describe('self checkout', () => {
     expect(screen.getByRole('heading', { name: 'システムパスワード' })).toBeInTheDocument()
   })
 
-  it('resets an unfinished Z touch sequence after 1.5 seconds', () => {
+  it('allows up to 1.5 seconds between each Z touch', () => {
     vi.useFakeTimers()
     render(<App />)
 
     fireEvent.pointerDown(screen.getByRole('button', { name: 'hidden-tl' }))
-    act(() => vi.advanceTimersByTime(500))
+    act(() => vi.advanceTimersByTime(1_400))
     fireEvent.pointerDown(screen.getByRole('button', { name: 'hidden-tr' }))
-    act(() => vi.advanceTimersByTime(500))
+    act(() => vi.advanceTimersByTime(1_400))
     fireEvent.pointerDown(screen.getByRole('button', { name: 'hidden-br' }))
-    act(() => vi.advanceTimersByTime(501))
+    act(() => vi.advanceTimersByTime(1_400))
     fireEvent.pointerDown(screen.getByRole('button', { name: 'hidden-bl' }))
-    expect(screen.queryByRole('heading', { name: 'システムパスワード' })).not.toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'システムパスワード' })).toBeInTheDocument()
+    vi.useRealTimers()
+  })
 
-    for (const corner of ['tl', 'tr', 'br', 'bl']) {
+  it('resets the Z touch sequence when one interval exceeds 1.5 seconds', () => {
+    vi.useFakeTimers()
+    render(<App />)
+
+    fireEvent.pointerDown(screen.getByRole('button', { name: 'hidden-tl' }))
+    act(() => vi.advanceTimersByTime(1_501))
+    for (const corner of ['tr', 'br', 'bl']) {
       fireEvent.pointerDown(screen.getByRole('button', { name: `hidden-${corner}` }))
     }
-    expect(screen.getByRole('heading', { name: 'システムパスワード' })).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'システムパスワード' })).not.toBeInTheDocument()
     vi.useRealTimers()
   })
 })

@@ -138,7 +138,7 @@ export function App() {
       setSequence(0)
       sequenceRef.current = 0
       setScreen('lock')
-    } else if (next === 1) {
+    } else if (next > 0) {
       window.clearTimeout(sequenceTimer.current)
       sequenceTimer.current = window.setTimeout(() => {
         sequenceRef.current = 0
