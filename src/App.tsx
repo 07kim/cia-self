@@ -255,45 +255,30 @@ export function App() {
         <>
           {screen === 'home' ? (
             <section className="homeScreen">
-              <div className="homeCopy">
+              <div className="homeHeader">
                 <div className="compactBrand"><i /><b>CIA MART</b><small>SELF CHECKOUT</small></div>
-                <span className="welcome">いらっしゃいませ</span>
-                <h1>セルフレジ</h1>
-                <p>画面の案内に沿って<br />お会計をはじめてください。</p>
-                <div className="homeVisual" aria-hidden="true">
-                  <div className="productShape"><i /><i /><i /></div>
-                  <div className="scanBeam" />
-                  <div className="barcode"><i /><i /><i /><i /><i /><i /><i /><i /></div>
-                  <b>バーコードをカメラで読み取ります</b>
+                <div className="homeUtilities">
+                  <button aria-label="日本語" onClick={() => setDialog('language')} type="button">文 <span>日本語</span></button>
+                  <button aria-label={largeText ? '標準表示に戻す' : '文字を大きくする'} onClick={() => setLargeText((value) => !value)} type="button">Aa <span>{largeText ? '標準' : '大きく'}</span></button>
+                  <button aria-label={muted ? '効果音をオンにする' : '効果音をオフにする'} onClick={() => { void unlock(); toggleMuted() }} type="button">♪ <span>{muted ? 'OFF' : 'ON'}</span></button>
                 </div>
               </div>
-              <div className="homeMenu">
-                <button className="startButton" onClick={beginCheckout} type="button">
-                  <span><small>画面をタッチ</small>お買い物を始める</span>
-                  <b aria-hidden="true">→</b>
+              <h1 className="visuallyHidden">CIA MART 会計端末</h1>
+              <div className="homeLaunch">
+                <button aria-label="会計を開始" className="startButton" onClick={beginCheckout} type="button">
+                  <span className="startCopy"><small>CHECKOUT</small><strong>START</strong><b>会計開始</b></span>
+                  <span className="startVisual" aria-hidden="true">
+                    <span className="productShape"><i /><i /><i /></span>
+                    <span className="scanBeam" />
+                    <span className="barcode"><i /><i /><i /><i /><i /><i /><i /><i /></span>
+                  </span>
+                  <span className="startArrow" aria-hidden="true">→</span>
                 </button>
-                <button className="menuButton code" onClick={() => setDialog('manual')} type="button">
-                  <i aria-hidden="true">▥</i><span><b>商品コードを入力</b><small>カメラを使わずに登録</small></span>
-                </button>
-                <button className="menuButton guide" onClick={() => setDialog('guide')} type="button">
-                  <i aria-hidden="true">?</i><span><b>使い方を見る</b><small>お買い物の手順</small></span>
-                </button>
-                <button className="menuButton staff" onClick={() => setDialog('staff')} type="button">
-                  <i aria-hidden="true">●</i><span><b>係員を呼ぶ</b><small>お困りのとき</small></span>
-                </button>
-                <button className="menuButton language" onClick={() => setDialog('language')} type="button">
-                  <i aria-hidden="true">文</i><span><b>日本語</b><small>LANGUAGE</small></span>
-                </button>
-                <button className="menuButton display" onClick={() => setLargeText((value) => !value)} type="button">
-                  <i aria-hidden="true">Aa</i><span><b>{largeText ? '標準表示に戻す' : '文字を大きくする'}</b><small>画面表示</small></span>
-                </button>
-                <button
-                  className="menuButton sound"
-                  onClick={() => { void unlock(); toggleMuted() }}
-                  type="button"
-                >
-                  <i aria-hidden="true">♪</i><span><b>{muted ? '効果音をオンにする' : '効果音をオフにする'}</b><small>{muted ? 'SOUND OFF' : 'SOUND ON'}</small></span>
-                </button>
+                <aside className="homeAssist" aria-label="補助メニュー">
+                  <button aria-label="商品コードを入力" onClick={() => setDialog('manual')} type="button"><i aria-hidden="true">▥</i><span><b>商品コード</b><small>手入力</small></span></button>
+                  <button aria-label="使い方を見る" onClick={() => setDialog('guide')} type="button"><i aria-hidden="true">?</i><span><b>使い方</b><small>操作案内</small></span></button>
+                  <button aria-label="係員を呼ぶ" onClick={() => setDialog('staff')} type="button"><i aria-hidden="true">●</i><span><b>係員</b><small>呼び出し</small></span></button>
+                </aside>
               </div>
               <div className="homeGuide">
                 <div><b>1</b><span><small>POINT</small>ポイント</span></div>
@@ -394,16 +379,16 @@ export function App() {
               <KioskProgress current={screen as 'points' | 'bag' | 'payment'} />
               <div className="choiceCard">
                 <div className="choiceHeading">
-                  <span>CIA MART / SELF CHECKOUT</span>
-                  <h1>{screen === 'points' ? 'ポイント' : screen === 'bag' ? 'レジ袋' : '支払方法'}</h1>
-                  <p>{screen === 'points' ? 'ポイントカードを選択' : screen === 'bag' ? '必要なレジ袋を選択' : 'お支払い方法を選択'}</p>
+                  <small>{screen === 'points' ? 'POINT CARD' : screen === 'bag' ? 'SHOPPING BAG' : 'PAYMENT'}</small>
+                  <h1>{screen === 'points' ? 'ポイントカード' : screen === 'bag' ? 'レジ袋' : 'お支払い'}</h1>
+                  <p>{screen === 'points' ? 'お持ちのカードを選択' : screen === 'bag' ? '必要なサイズを選択' : '支払方法を選択'}</p>
                 </div>
-                <div className="choiceTiles">
+                <div className="choiceTiles" data-options={screen === 'payment' ? '4' : '3'}>
                   {screen === 'points' ? (
                     <>
-                      <button onClick={() => choosePoint('貯める')} type="button"><i>＋P</i><b>貯める</b><small>ポイント付与</small></button>
-                      <button onClick={() => choosePoint('使う')} type="button"><i>−P</i><b>使う</b><small>ポイント利用</small></button>
-                      <button className="neutral" onClick={() => choosePoint('利用しない')} type="button"><i>—</i><b>利用しない</b><small>次へ</small></button>
+                      <button onClick={() => choosePoint('CIA POINT')} type="button"><i>CP</i><b>CIA POINT</b><small>ポイントカード</small></button>
+                      <button onClick={() => choosePoint('提携ポイント')} type="button"><i>＋P</i><b>提携ポイント</b><small>PARTNER POINT</small></button>
+                      <button className="neutral" onClick={() => choosePoint('利用しない')} type="button"><i>—</i><b>利用しない</b><small>ポイントカードなし</small></button>
                     </>
                   ) : screen === 'bag' ? (
                     <>

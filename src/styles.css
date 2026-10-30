@@ -302,6 +302,136 @@ button { cursor: pointer; }
 .homeGuide span { display: grid; gap: 3px; font-weight: 800; }
 .homeGuide small { color: #7a8997; font-size: 10px; letter-spacing: .12em; }
 
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.homeScreen {
+  grid-template-columns: 1fr;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: clamp(18px, 2.6vh, 30px);
+  padding: clamp(24px, 3vw, 44px) clamp(28px, 5vw, 72px) clamp(20px, 3vw, 36px);
+}
+.homeHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+.homeHeader .compactBrand { margin: 0; }
+.homeUtilities { display: flex; gap: 8px; }
+.homeUtilities button {
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 10px;
+  background: #edf2f6;
+  color: #2b4156;
+  font-weight: 900;
+}
+.homeUtilities button span { color: #67798a; font-size: 11px; }
+.homeLaunch {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(230px, .72fr);
+  gap: clamp(16px, 2vw, 26px);
+}
+.startButton {
+  position: relative;
+  grid-column: auto;
+  min-height: clamp(390px, 55vh, 600px);
+  align-items: stretch;
+  padding: clamp(34px, 5vw, 68px);
+  overflow: hidden;
+  border-radius: 28px;
+  text-align: left;
+}
+.startCopy {
+  position: relative;
+  z-index: 3;
+  align-self: center;
+  display: grid;
+  gap: 0;
+}
+.startCopy small { color: #cfe2ff; font-size: 12px; font-weight: 900; letter-spacing: .2em; }
+.startCopy strong {
+  margin: 8px 0 4px;
+  font-size: clamp(70px, 10vw, 148px);
+  line-height: .88;
+  letter-spacing: -.07em;
+}
+.startCopy b { color: #e5f0ff; font-size: clamp(16px, 1.7vw, 24px); }
+.startVisual {
+  position: absolute;
+  z-index: 1;
+  right: clamp(76px, 12vw, 180px);
+  bottom: -10%;
+  width: clamp(230px, 29vw, 420px);
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 10%);
+  box-shadow: 0 0 0 clamp(28px, 4vw, 60px) rgb(255 255 255 / 5%);
+}
+.startVisual .productShape { width: 98px; height: 136px; background: #ffae44; }
+.startVisual .scanBeam { width: 190px; }
+.startVisual .barcode { top: 14%; right: 6%; }
+.startArrow {
+  position: relative;
+  z-index: 3;
+  align-self: flex-end;
+  display: grid;
+  width: clamp(62px, 7vw, 92px);
+  aspect-ratio: 1;
+  place-items: center;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--blue);
+  font-size: clamp(30px, 4vw, 48px);
+}
+.homeAssist {
+  display: grid;
+  grid-template-rows: repeat(3, 1fr);
+  gap: 12px;
+}
+.homeAssist button {
+  display: grid;
+  grid-template-columns: 54px 1fr;
+  align-items: center;
+  gap: 14px;
+  padding: 20px;
+  border: 0;
+  border-radius: 18px;
+  background: #edf2f6;
+  color: #273c50;
+  text-align: left;
+}
+.homeAssist button:hover { background: #e3edf7; }
+.homeAssist i {
+  display: grid;
+  width: 54px;
+  aspect-ratio: 1;
+  place-items: center;
+  border-radius: 14px;
+  background: #fff;
+  color: var(--blue);
+  font-style: normal;
+  font-weight: 900;
+}
+.homeAssist span { display: grid; gap: 4px; }
+.homeAssist b { font-size: clamp(17px, 1.5vw, 22px); }
+.homeAssist small { color: #708292; font-size: 11px; }
+.homeGuide div { padding: 16px 24px; }
+
 .checkoutGrid {
   min-height: 100dvh;
   display: grid;
@@ -541,30 +671,33 @@ button { cursor: pointer; }
   background: #fff;
 }
 .choiceCard {
-  width: min(1120px, 100%);
+  width: min(1320px, 100%);
   align-self: center;
   justify-self: center;
   display: grid;
-  grid-template-columns: minmax(250px, .55fr) minmax(520px, 1.45fr);
-  gap: clamp(22px, 4vw, 60px);
-  align-items: center;
-  padding: clamp(20px, 4vw, 44px) 0;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: clamp(34px, 6vh, 72px);
+  align-items: stretch;
+  padding: clamp(10px, 2vw, 24px) 0;
   border: 0;
   border-radius: 0;
   background: transparent;
 }
-.choiceHeading span { color: var(--blue); font-size: 11px; font-weight: 900; letter-spacing: .12em; }
-.choiceHeading h1 { margin: 14px 0 6px; color: var(--navy); font-size: clamp(36px, 5vw, 64px); }
-.choiceHeading p { margin: 0; color: #617486; font-weight: 700; }
-.choiceTiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.choiceHeading small { color: var(--blue); font-size: 11px; font-weight: 900; letter-spacing: .18em; }
+.choiceHeading h1 { margin: 6px 0 4px; color: var(--navy); font-size: clamp(54px, 7vw, 92px); line-height: 1; letter-spacing: -.055em; }
+.choiceHeading p { margin: 0; color: #617486; font-size: clamp(16px, 1.6vw, 22px); font-weight: 700; }
+.choiceTiles { display: grid; gap: clamp(14px, 1.7vw, 24px); }
+.choiceTiles[data-options='3'] { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.choiceTiles[data-options='4'] { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .choiceTiles button {
-  min-height: 152px;
+  min-height: clamp(190px, 29vh, 300px);
   display: grid;
-  grid-template-columns: 58px 1fr;
-  grid-template-rows: 1fr 1fr;
-  gap: 2px 15px;
-  align-items: end;
-  padding: 24px;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr auto auto;
+  gap: 6px;
+  align-items: start;
+  padding: clamp(24px, 3vw, 38px);
   border: 0;
   border-radius: 18px;
   background: var(--blue);
@@ -574,9 +707,9 @@ button { cursor: pointer; }
 }
 .choiceTiles button:active { translate: 0 2px; box-shadow: inset 0 -2px #094d9f; }
 .choiceTiles button.neutral { background: #e7edf2; color: #263a4d; box-shadow: inset 0 -4px #c2ced7; }
-.choiceTiles i { grid-row: 1 / span 2; align-self: center; display: grid; width: 58px; aspect-ratio: 1; place-items: center; border-radius: 14px; background: #fff; color: var(--blue); font-size: 20px; font-style: normal; font-weight: 900; }
+.choiceTiles i { align-self: start; display: grid; width: clamp(62px, 6vw, 86px); aspect-ratio: 1; place-items: center; border-radius: 18px; background: #fff; color: var(--blue); font-size: clamp(20px, 2.3vw, 32px); font-style: normal; font-weight: 900; }
 .choiceTiles .neutral i { color: #596b7a; }
-.choiceTiles b { align-self: end; font-size: clamp(20px, 2.2vw, 30px); }
+.choiceTiles b { align-self: end; font-size: clamp(23px, 2.5vw, 36px); line-height: 1.08; }
 .choiceTiles small { align-self: start; color: #dceaff; font-size: 12px; }
 .choiceTiles .neutral small { color: #71808d; }
 .choiceFooter {
@@ -787,8 +920,8 @@ button { cursor: pointer; }
 @keyframes staffSignal { to { opacity: .45; scale: 1 .75; } }
 
 @media (max-width: 1000px) {
-  .homeScreen { grid-template-columns: minmax(310px, .76fr) minmax(460px, 1.24fr); padding: 30px; }
-  .homeCopy { padding-left: 34px; }
+  .homeScreen { grid-template-columns: 1fr; padding: 30px; }
+  .homeLaunch { grid-template-columns: minmax(0, 2.4fr) minmax(210px, .8fr); }
   .checkoutGrid { grid-template-columns: minmax(330px, .9fr) minmax(440px, 1.1fr); }
   .history { grid-template-columns: 1fr; }
 }
@@ -797,17 +930,12 @@ button { cursor: pointer; }
   .brand > span, .brand > small { display: none; }
   .brand .soundButton { margin-right: 66px; margin-left: auto; }
   .homeScreen { min-height: 100dvh; grid-template-columns: 1fr; grid-template-rows: auto auto auto; gap: 18px; padding: 22px; }
-  .homeCopy { min-height: 390px; padding: 28px 28px 200px; }
-  .homeCopy p br { display: none; }
-  .homeVisual { inset: auto 0 0; height: 180px; }
-  .homeVisual::before { width: 150px; height: 150px; box-shadow: 0 0 0 18px #dcecff; }
-  .productShape { width: 72px; height: 96px; border-radius: 10px 10px 20px 20px; }
-  .scanBeam { width: 120px; }
-  .homeVisual > b { right: auto; bottom: 12px; left: 12px; padding: 8px 10px; }
-  .homeMenu { grid-template-columns: 1fr; }
-  .startButton { min-height: 130px; padding: 25px; border-radius: 18px; }
-  .startButton > b { flex-basis: 52px; }
-  .menuButton, .menuButton.display { grid-column: 1; }
+  .homeLaunch { grid-template-columns: 1fr; }
+  .startButton { min-height: 430px; padding: 34px; border-radius: 22px; }
+  .startVisual { right: 12%; width: 300px; }
+  .homeAssist { grid-template-columns: repeat(3, 1fr); grid-template-rows: auto; }
+  .homeAssist button { min-height: 104px; grid-template-columns: 42px 1fr; padding: 14px; }
+  .homeAssist i { width: 42px; }
   .homeGuide { grid-template-columns: 1fr; }
   .homeGuide div { border-top: 0; border-right: 0; border-bottom: 1px solid var(--line); }
   .homeGuide div:first-child { border-top: 1px solid var(--line); }
@@ -817,8 +945,7 @@ button { cursor: pointer; }
   .cameraFrame { height: 340px; }
   .checkoutFooter { grid-column: 1; }
   .feedback { min-width: 0; width: calc(100% - 28px); }
-  .choiceCard { grid-template-columns: 1fr; }
-  .choiceHeading { text-align: center; }
+  .choiceTiles[data-options='3'], .choiceTiles[data-options='4'] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .choiceFooter { grid-template-columns: 100px 1fr 100px; }
   .employeeTiles { grid-template-columns: 1fr; }
   .thead, .table > button { grid-template-columns: 58px 1fr 85px 75px; }
@@ -828,9 +955,15 @@ button { cursor: pointer; }
   .kioskProgress span { min-height: 48px; gap: 4px; font-size: 9px; }
   .kioskProgress i { width: 22px; }
   .choiceScreen, .completeScreen { gap: 12px; padding: 12px; }
-  .choiceCard { padding: 22px 16px; border-radius: 16px; }
-  .choiceTiles { grid-template-columns: 1fr; }
+  .choiceCard { padding: 22px 16px; border-radius: 0; }
+  .choiceTiles[data-options='3'], .choiceTiles[data-options='4'] { grid-template-columns: 1fr; }
   .choiceTiles button { min-height: 112px; }
+  .homeHeader { align-items: flex-start; }
+  .homeUtilities { flex-wrap: wrap; justify-content: flex-end; }
+  .homeUtilities button span { display: none; }
+  .startButton { min-height: 340px; }
+  .startVisual { right: -10%; width: 240px; }
+  .homeAssist { grid-template-columns: 1fr; }
   .choiceFooter { grid-template-columns: 76px 1fr 76px; }
   .choiceFooter > div { flex-wrap: wrap; gap: 5px 8px; padding: 8px; }
   .quickProducts { grid-template-columns: repeat(2, minmax(0, 1fr)); }

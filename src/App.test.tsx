@@ -20,11 +20,13 @@ describe('self checkout', () => {
 
   it('completes the staged checkout and adds a registered item', async () => {
     render(<App />)
-    expect(screen.getByRole('heading', { name: 'セルフレジ' })).toBeInTheDocument()
-    expect(screen.getByText('いらっしゃいませ')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'CIA MART 会計端末' })).toBeInTheDocument()
+    expect(screen.queryByText('セルフレジ')).not.toBeInTheDocument()
 
-    fireEvent.click(screen.getByRole('button', { name: /お買い物を始める/ }))
-    expect(screen.getByRole('heading', { name: 'ポイント' })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: '会計を開始' }))
+    expect(screen.getByRole('heading', { name: 'ポイントカード' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /CIA POINT/ })).toBeVisible()
+    expect(screen.getByRole('button', { name: /提携ポイント/ })).toBeVisible()
     fireEvent.click(screen.getByRole('button', { name: /利用しない/ }))
     fireEvent.click(screen.getByRole('button', { name: /不要/ }))
     fireEvent.click(screen.getByRole('button', { name: /クレジット/ }))
