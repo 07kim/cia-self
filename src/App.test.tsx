@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react'
+import { act, fireEvent, render, screen, within } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const startBarcodeScanner = vi.fn()
@@ -23,7 +23,7 @@ describe('self checkout', () => {
     expect(screen.getByRole('heading', { name: 'CIA MART 会計端末' })).toBeInTheDocument()
     expect(screen.queryByText('セルフレジ')).not.toBeInTheDocument()
 
-    fireEvent.click(screen.getByRole('button', { name: '会計を開始' }))
+    fireEvent.click(screen.getByRole('button', { name: 'お会計を始める' }))
     expect(screen.getByRole('heading', { name: 'ポイントカード' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /CIA POINT/ })).toBeVisible()
     expect(screen.getByRole('button', { name: /提携ポイント/ })).toBeVisible()
@@ -40,32 +40,61 @@ describe('self checkout', () => {
     expect(screen.queryByText('ありがとうございました')).not.toBeInTheDocument()
   })
 
-  it('opens every home support menu and changes display mode', () => {
+  it('uses confirmation before calling an attendant and changes display mode', () => {
     render(<App />)
 
-    expect(screen.queryByRole('banner')).not.toBeInTheDocument()
-
-    fireEvent.click(screen.getByRole('button', { name: /商品コードを入力/ }))
-    expect(screen.getByRole('dialog')).toHaveTextContent('商品コードを入力')
-    fireEvent.click(screen.getByRole('button', { name: '閉じる' }))
+    expect(screen.queryByRole('button', { name: /商品コード/ })).not.toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: /使い方を見る/ }))
     expect(screen.getByRole('dialog')).toHaveTextContent('セルフレジの使い方')
     fireEvent.click(screen.getByRole('button', { name: '閉じる' }))
 
     fireEvent.click(screen.getByRole('button', { name: /係員を呼ぶ/ }))
-    expect(screen.getByRole('dialog')).toHaveTextContent('係員を呼び出しました')
-    fireEvent.click(screen.getByRole('button', { name: '閉じる' }))
-
-    fireEvent.click(screen.getByRole('button', { name: /日本語/ }))
-    expect(screen.getByRole('dialog')).toHaveTextContent('表示言語')
-    fireEvent.click(screen.getByRole('button', { name: '閉じる' }))
+    expect(screen.getByRole('dialog')).toHaveTextContent('係員を呼びますか？')
+    fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: '係員を呼ぶ' }))
+    expect(screen.getByRole('dialog')).toHaveTextContent('混雑状況により、お伺いまでお時間をいただく場合や、対応できない場合がございます。')
+    fireEvent.click(screen.getByRole('button', { name: '画面に戻る' }))
 
     fireEvent.click(screen.getByRole('button', { name: /文字を大きくする/ }))
     expect(screen.getByRole('button', { name: /標準表示に戻す/ })).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: /効果音をオフにする/ }))
     expect(screen.getByRole('button', { name: /効果音をオンにする/ })).toBeInTheDocument()
+  })
+
+  it('stops at point scanning when a point card is selected', () => {
+    render(<App />)
+    fireEvent.click(screen.getByRole('button', { name: 'お会計を始める' }))
+    fireEvent.click(screen.getByRole('button', { name: /CIA POINT/ }))
+    expect(screen.getByRole('heading', { name: 'ポイントカードを読み取ってください' })).toBeInTheDocument()
+    expect(screen.getByText('読み取りを待っています')).toBeVisible()
+    expect(screen.queryByRole('button', { name: /次へ/ })).not.toBeInTheDocument()
+  })
+
+  it('adds a selected shopping bag to the basket and has no item selection buttons', async () => {
+    render(<App />)
+    fireEvent.click(screen.getByRole('button', { name: 'お会計を始める' }))
+    fireEvent.click(screen.getByRole('button', { name: /利用しない/ }))
+    fireEvent.click(screen.getByRole('button', { name: /小/ }))
+    fireEvent.click(screen.getByRole('button', { name: /クレジット/ }))
+    expect(await screen.findByText('レジ袋 小')).toBeVisible()
+    expect(screen.queryByText('商品選択')).not.toBeInTheDocument()
+  })
+
+  it('switches the customer flow to English', () => {
+    render(<App />)
+    fireEvent.click(screen.getByRole('button', { name: 'Switch to English' }))
+    expect(screen.getByRole('button', { name: 'Start checkout' })).toBeVisible()
+    expect(screen.getByRole('button', { name: '日本語に切り替える' })).toBeVisible()
+  })
+
+  it('does not return home automatically while the checkout is open', () => {
+    vi.useFakeTimers()
+    render(<App />)
+    fireEvent.click(screen.getByRole('button', { name: 'お会計を始める' }))
+    act(() => vi.advanceTimersByTime(180_000))
+    expect(screen.getByRole('heading', { name: 'ポイントカード' })).toBeInTheDocument()
+    vi.useRealTimers()
   })
 
   it('opens management authentication with the four-point Z touch sequence', () => {

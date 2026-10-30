@@ -9,6 +9,8 @@ export type Product = {
 }
 
 export const products: Product[] = [
+  { barcode: '2900000000032', name: 'レジ袋 小', price: 3, taxRate: 10, category: 'supply', active: true },
+  { barcode: '2900000000056', name: 'レジ袋 大', price: 5, taxRate: 10, category: 'supply', active: true },
   { barcode: '2000000000015', name: '天然水 550ml', price: 110, taxRate: 8, category: 'drink', active: true },
   { barcode: '2000000000022', name: '鮭おにぎり', price: 190, taxRate: 8, category: 'food', active: true },
   { barcode: '2000000000039', name: '無糖コーヒー', price: 180, taxRate: 8, category: 'drink', active: true },

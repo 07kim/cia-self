@@ -9,23 +9,24 @@ import {
 import { findProduct, products, type Product } from './catalog'
 import { searchTransactions, total, type Transaction } from './data'
 
-type Screen = 'home' | 'points' | 'bag' | 'payment' | 'checkout' | 'settlement' | 'lock' | 'employee' | 'history'
+type Screen = 'home' | 'points' | 'pointScan' | 'bag' | 'payment' | 'checkout' | 'settlement' | 'lock' | 'employee' | 'history'
 type Corner = 'tl' | 'tr' | 'br' | 'bl'
-type HomeDialog = 'manual' | 'guide' | 'staff' | 'language' | null
+type HomeDialog = 'guide' | 'staffConfirm' | 'staffCalled' | null
 type EmployeeView = 'menu' | 'catalog' | 'terminal' | 'settings'
 type CartLine = Product & { qty: number }
 type Feedback = { tone: 'success' | 'error'; title: string; detail: string } | null
+type Locale = 'ja' | 'en'
 
 const corners: Corner[] = ['tl', 'tr', 'bl', 'br']
 const Z_SEQUENCE_LIMIT_MS = 1_500
 
-function KioskProgress({ current }: { current: 'points' | 'bag' | 'payment' | 'checkout' | 'settlement' }) {
+function KioskProgress({ current, locale }: { current: 'points' | 'bag' | 'payment' | 'checkout' | 'settlement'; locale: Locale }) {
   const steps = [
-    ['points', 'ポイント'],
-    ['bag', 'レジ袋'],
-    ['payment', '支払方法'],
-    ['checkout', '商品登録'],
-    ['settlement', 'お支払い'],
+    ['points', locale === 'ja' ? 'ポイント' : 'Points'],
+    ['bag', locale === 'ja' ? 'レジ袋' : 'Bag'],
+    ['payment', locale === 'ja' ? '支払方法' : 'Payment'],
+    ['checkout', locale === 'ja' ? '商品登録' : 'Scan'],
+    ['settlement', locale === 'ja' ? 'お支払い' : 'Pay'],
   ] as const
   const currentIndex = steps.findIndex(([id]) => id === current)
   return (
@@ -50,13 +51,12 @@ export function App() {
   const [scannerState, setScannerState] = useState<ScannerState>('idle')
   const [feedback, setFeedback] = useState<Feedback>(null)
   const [dialog, setDialog] = useState<HomeDialog>(null)
-  const [manualCode, setManualCode] = useState('')
   const [largeText, setLargeText] = useState(false)
+  const [locale, setLocale] = useState<Locale>('ja')
   const [pointChoice, setPointChoice] = useState('未選択')
   const [bagChoice, setBagChoice] = useState('未選択')
   const [paymentChoice, setPaymentChoice] = useState('未選択')
   const [employeeView, setEmployeeView] = useState<EmployeeView>('menu')
-  const timer = useRef<number>(0)
   const feedbackTimer = useRef<number>(0)
   const sequenceTimer = useRef<number>(0)
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -79,7 +79,6 @@ export function App() {
     setScannerState('idle')
     setFeedback(null)
     setDialog(null)
-    setManualCode('')
     setPointChoice('未選択')
     setBagChoice('未選択')
     setPaymentChoice('未選択')
@@ -88,24 +87,6 @@ export function App() {
     sequenceRef.current = 0
     lastCornerInput.current = { corner: null, at: Number.NEGATIVE_INFINITY }
   }, [])
-
-  useEffect(() => {
-    if (screen === 'home') return
-    const reset = () => {
-      window.clearTimeout(timer.current)
-      timer.current = window.setTimeout(
-        goHome,
-        ['points', 'bag', 'payment', 'checkout', 'settlement'].includes(screen) ? 60_000 : 10_000,
-      )
-    }
-    reset()
-    const events = ['pointerdown', 'keydown', 'input']
-    events.forEach((event) => window.addEventListener(event, reset))
-    return () => {
-      window.clearTimeout(timer.current)
-      events.forEach((event) => window.removeEventListener(event, reset))
-    }
-  }, [goHome, screen])
 
   useEffect(() => () => {
     scanner.current?.stop()
@@ -127,7 +108,7 @@ export function App() {
     const product = findProduct(code)
     if (!product) {
       play('unknown')
-      announce({ tone: 'error', title: '商品が登録されていません', detail: `コード ${code}` })
+      announce({ tone: 'error', title: locale === 'ja' ? '商品が登録されていません' : 'Item not registered', detail: `${locale === 'ja' ? 'コード' : 'Code'} ${code}` })
       return
     }
     setCart((current) => {
@@ -137,8 +118,8 @@ export function App() {
         : [...current, { ...product, qty: 1 }]
     })
     play('scan')
-    announce({ tone: 'success', title: '商品を追加しました', detail: product.name })
-  }, [announce, play])
+    announce({ tone: 'success', title: locale === 'ja' ? '商品を追加しました' : 'Item added', detail: product.name })
+  }, [announce, locale, play])
 
   const startScanner = useCallback(async () => {
     if (!videoRef.current || scanner.current) return
@@ -196,16 +177,6 @@ export function App() {
     setScreen('points')
   }
 
-  const submitManualCode = () => {
-    const code = manualCode.normalize('NFKC').replace(/\s/g, '')
-    if (!code) return
-    void unlock().then(() => play('tap'))
-    setDialog(null)
-    setScreen('points')
-    onBarcode(code)
-    setManualCode('')
-  }
-
   const authenticate = () => {
     if (answer.normalize('NFKC').trim() === 'ばいてん') {
       play('granted')
@@ -229,13 +200,23 @@ export function App() {
   const choosePoint = (choice: string) => {
     play('tap')
     setPointChoice(choice)
-    setScreen('bag')
+    setScreen(choice === '利用しない' ? 'bag' : 'pointScan')
   }
 
-  const chooseBag = (choice: string) => {
+  const chooseBag = (choice: string, bagProduct?: Product) => {
     play('tap')
     setBagChoice(choice)
+    setCart((current) => {
+      const withoutBag = current.filter((line) => !line.barcode.startsWith('29000000000'))
+      return bagProduct ? [...withoutBag, { ...bagProduct, qty: 1 }] : withoutBag
+    })
     setScreen('payment')
+  }
+
+  const requestStaff = () => setDialog('staffConfirm')
+  const callStaff = () => {
+    play('tap')
+    setDialog('staffCalled')
   }
 
   const choosePayment = (choice: string) => {
@@ -249,31 +230,32 @@ export function App() {
   const cartCount = cart.reduce((sum, line) => sum + line.qty, 0)
   const results = searchTransactions(query)
   const paymentInstruction = paymentChoice === 'クレジットカード'
-    ? 'カードを決済端末に挿入してください'
+    ? locale === 'ja' ? 'カードを決済端末に挿入してください' : 'Insert your card into the payment terminal'
     : paymentChoice === '交通系IC'
-      ? 'カードまたは端末をタッチしてください'
+      ? locale === 'ja' ? 'カードまたは端末をタッチしてください' : 'Touch your card or device on the terminal'
       : paymentChoice === 'コード決済'
-        ? '決済コードを読み取ってください'
-        : '現金を決済端末へ投入してください'
+        ? locale === 'ja' ? '決済コードを読み取ってください' : 'Scan your payment code'
+        : locale === 'ja' ? '現金を決済端末へ投入してください' : 'Insert cash into the payment terminal'
+  const isJa = locale === 'ja'
 
   return (
     <main className={`app ${screen}${largeText ? ' largeText' : ''}`}>
-      {(['home', 'points', 'bag', 'payment', 'checkout', 'settlement'] as Screen[]).includes(screen) ? (
+      {(['home', 'points', 'pointScan', 'bag', 'payment', 'checkout', 'settlement'] as Screen[]).includes(screen) ? (
         <>
+          <header className="kioskHeader">
+            <div className="compactBrand"><i /><b>CIA MART</b><small>SELF CHECKOUT</small></div>
+            <div className="homeUtilities">
+              <button aria-label={isJa ? 'Switch to English' : '日本語に切り替える'} onClick={() => setLocale(isJa ? 'en' : 'ja')} type="button">文 <span>{isJa ? 'English' : '日本語'}</span></button>
+              <button aria-label={largeText ? (isJa ? '標準表示に戻す' : 'Use standard text size') : (isJa ? '文字を大きくする' : 'Use larger text')} onClick={() => setLargeText((value) => !value)} type="button">Aa <span>{largeText ? (isJa ? '標準' : 'Standard') : (isJa ? '大きく' : 'Larger')}</span></button>
+              <button aria-label={muted ? (isJa ? '効果音をオンにする' : 'Turn sound on') : (isJa ? '効果音をオフにする' : 'Turn sound off')} onClick={() => { void unlock(); toggleMuted() }} type="button">♪ <span>{muted ? 'OFF' : 'ON'}</span></button>
+            </div>
+          </header>
           {screen === 'home' ? (
             <section className="homeScreen">
-              <div className="homeHeader">
-                <div className="compactBrand"><i /><b>CIA MART</b><small>SELF CHECKOUT</small></div>
-                <div className="homeUtilities">
-                  <button aria-label="日本語" onClick={() => setDialog('language')} type="button">文 <span>日本語</span></button>
-                  <button aria-label={largeText ? '標準表示に戻す' : '文字を大きくする'} onClick={() => setLargeText((value) => !value)} type="button">Aa <span>{largeText ? '標準' : '大きく'}</span></button>
-                  <button aria-label={muted ? '効果音をオンにする' : '効果音をオフにする'} onClick={() => { void unlock(); toggleMuted() }} type="button">♪ <span>{muted ? 'OFF' : 'ON'}</span></button>
-                </div>
-              </div>
-              <h1 className="visuallyHidden">CIA MART 会計端末</h1>
+              <h1 className="visuallyHidden">{isJa ? 'CIA MART 会計端末' : 'CIA MART Checkout'}</h1>
               <div className="homeLaunch">
-                <button aria-label="会計を開始" className="startButton" onClick={beginCheckout} type="button">
-                  <span className="startCopy"><small>CHECKOUT</small><strong>START</strong><b>会計開始</b></span>
+                <button aria-label={isJa ? 'お会計を始める' : 'Start checkout'} className="startButton" onClick={beginCheckout} type="button">
+                  <span className="startCopy"><small>{isJa ? 'CHECKOUT' : 'WELCOME'}</small><strong>{isJa ? 'お会計' : 'CHECKOUT'}</strong><b>{isJa ? '商品登録へ進む' : 'Start your purchase'}</b></span>
                   <span className="startVisual" aria-hidden="true">
                     <span className="productShape"><i /><i /><i /></span>
                     <span className="scanBeam" />
@@ -281,54 +263,61 @@ export function App() {
                   </span>
                   <span className="startArrow" aria-hidden="true">→</span>
                 </button>
-                <aside className="homeAssist" aria-label="補助メニュー">
-                  <button aria-label="商品コードを入力" onClick={() => setDialog('manual')} type="button"><i aria-hidden="true">▥</i><span><b>商品コード</b><small>手入力</small></span></button>
-                  <button aria-label="使い方を見る" onClick={() => setDialog('guide')} type="button"><i aria-hidden="true">?</i><span><b>使い方</b><small>操作案内</small></span></button>
-                  <button aria-label="係員を呼ぶ" onClick={() => setDialog('staff')} type="button"><i aria-hidden="true">●</i><span><b>係員</b><small>呼び出し</small></span></button>
+                <aside className="homeAssist" aria-label={isJa ? '補助メニュー' : 'Support menu'}>
+                  <button aria-label={isJa ? '使い方を見る' : 'View instructions'} onClick={() => setDialog('guide')} type="button"><i aria-hidden="true">?</i><span><b>{isJa ? '使い方' : 'Help'}</b><small>{isJa ? '操作案内' : 'Instructions'}</small></span></button>
+                  <button aria-label={isJa ? '係員を呼ぶ' : 'Call an attendant'} onClick={requestStaff} type="button"><i aria-hidden="true">●</i><span><b>{isJa ? '係員' : 'Attendant'}</b><small>{isJa ? '呼び出し' : 'Call for help'}</small></span></button>
                 </aside>
               </div>
               <div className="homeGuide">
-                <div><b>1</b><span><small>POINT</small>ポイント</span></div>
-                <div><b>2</b><span><small>BAG</small>レジ袋</span></div>
-                <div><b>3</b><span><small>PAY</small>支払方法</span></div>
-                <div><b>4</b><span><small>SCAN</small>商品登録</span></div>
+                <div><b>1</b><span><small>POINT</small>{isJa ? 'ポイント' : 'Points'}</span></div>
+                <div><b>2</b><span><small>BAG</small>{isJa ? 'レジ袋' : 'Bag'}</span></div>
+                <div><b>3</b><span><small>PAY</small>{isJa ? '支払方法' : 'Payment'}</span></div>
+                <div><b>4</b><span><small>SCAN</small>{isJa ? '商品登録' : 'Scan items'}</span></div>
               </div>
+            </section>
+          ) : screen === 'pointScan' ? (
+            <section className="pointScanScreen">
+              <KioskProgress current="points" locale={locale} />
+              <div className="pointScanPanel">
+                <div className="pointReader" aria-hidden="true"><i /><i /></div>
+                <small>POINT READER</small>
+                <h1>{isJa ? 'ポイントカードを読み取ってください' : 'Scan your point card'}</h1>
+                <p>{isJa ? `${pointChoice}のカードまたはアプリを、読み取り部へ近づけてください。` : `Hold your ${pointChoice} card or app near the reader.`}</p>
+                <strong>{isJa ? '読み取りを待っています' : 'Waiting for card'}</strong>
+              </div>
+              <footer className="choiceFooter pointScanFooter">
+                <button onClick={() => setScreen('points')} type="button">{isJa ? '戻る' : 'Back'}</button>
+                <div><span>{isJa ? '選択中' : 'Selected'}</span><b>{pointChoice}</b></div>
+                <button onClick={requestStaff} type="button">{isJa ? '係員' : 'Attendant'}</button>
+              </footer>
             </section>
           ) : screen === 'checkout' ? (
             <section className="checkoutGrid">
-              <KioskProgress current="checkout" />
+              <KioskProgress current="checkout" locale={locale} />
               <section className="scanPanel">
                 <header>
-                  <span><small>STEP 1</small>商品を読み取る</span>
+                  <span><small>STEP 1</small>{isJa ? '商品を読み取る' : 'Scan items'}</span>
                   <div className="panelActions"><b>SCAN ITEM</b><button onClick={() => { void unlock(); toggleMuted() }} type="button">{muted ? '音声 OFF' : '音声 ON'}</button></div>
                 </header>
                 <div className={`cameraFrame ${scannerState}`}>
                   <video aria-label="バーコード読取カメラ" muted playsInline ref={videoRef} />
-                  <div className="scanGuide" aria-hidden="true"><i /><span>バーコードを枠内に合わせてください</span></div>
+                  <div className="scanGuide" aria-hidden="true"><i /><span>{isJa ? 'バーコードを枠内に合わせてください' : 'Place the barcode inside the frame'}</span></div>
                   {scannerState !== 'scanning' ? (
                     <div className="cameraState">
-                      {scannerState === 'requesting-permission' ? <><b>カメラを準備しています</b><span>CAMERA STARTING</span></> : null}
-                      {scannerState === 'permission-denied' ? <><b>カメラの使用が許可されていません</b><span>ブラウザの設定からカメラを許可してください</span><button onClick={() => { setScannerState('requesting-permission'); void startScanner() }}>もう一度試す</button></> : null}
-                      {scannerState === 'unavailable' ? <><b>カメラを起動できませんでした</b><span>対応端末またはカメラ設定をご確認ください</span><button onClick={() => { setScannerState('requesting-permission'); void startScanner() }}>再接続</button></> : null}
+                      {scannerState === 'requesting-permission' ? <><b>{isJa ? 'カメラを準備しています' : 'Preparing camera'}</b><span>CAMERA STARTING</span></> : null}
+                      {scannerState === 'permission-denied' ? <><b>{isJa ? 'カメラの使用が許可されていません' : 'Camera access is not allowed'}</b><span>{isJa ? 'ブラウザの設定からカメラを許可してください' : 'Allow camera access in your browser settings'}</span><button onClick={() => { setScannerState('requesting-permission'); void startScanner() }}>{isJa ? 'もう一度試す' : 'Try again'}</button></> : null}
+                      {scannerState === 'unavailable' ? <><b>{isJa ? 'カメラを起動できませんでした' : 'Camera could not be started'}</b><span>{isJa ? '対応端末またはカメラ設定をご確認ください' : 'Check this device and its camera settings'}</span><button onClick={() => { setScannerState('requesting-permission'); void startScanner() }}>{isJa ? '再接続' : 'Reconnect'}</button></> : null}
                     </div>
                   ) : null}
-                  <div className="cameraStatus"><i />{scannerState === 'scanning' ? '読取待機中' : 'カメラ確認中'}</div>
+                  <div className="cameraStatus"><i />{scannerState === 'scanning' ? (isJa ? '読取待機中' : 'Ready to scan') : (isJa ? 'カメラ確認中' : 'Checking camera')}</div>
                 </div>
-                <div className="quickProducts">
-                  <span>商品選択</span>
-                  {products.slice(0, 4).map((product) => (
-                    <button key={product.barcode} onClick={() => onBarcode(product.barcode)} type="button">
-                      <i aria-hidden="true">{product.name.slice(0, 1)}</i><b>{product.name}</b><small>¥{product.price}</small>
-                    </button>
-                  ))}
-                </div>
-                <p>商品のJANコード、またはCIA MARTの商品コードをカメラへ向けてください。</p>
+                <p>{isJa ? '商品のバーコードをカメラへ向けてください。画面から商品を選ぶことはできません。' : 'Hold the product barcode in front of the camera. Items cannot be selected on screen.'}</p>
               </section>
 
               <section className="cartPanel">
                 <header>
-                  <div><span><small>STEP 2</small>お買い物かご</span><b>SHOPPING CART</b></div>
-                  <strong>{cartCount}<small>点</small></strong>
+                  <div><span><small>STEP 2</small>{isJa ? 'お買い物かご' : 'Basket'}</span><b>SHOPPING CART</b></div>
+                  <strong>{cartCount}<small>{isJa ? '点' : ' items'}</small></strong>
                 </header>
                 <div className="cartLines">
                   {cart.length ? cart.map((line) => (
@@ -343,19 +332,19 @@ export function App() {
                       <strong>¥{(line.price * line.qty).toLocaleString()}</strong>
                     </article>
                   )) : (
-                    <div className="emptyCart"><i /><b>商品はまだありません</b><span>左側のカメラでバーコードを読み取ってください</span></div>
+                    <div className="emptyCart"><i /><b>{isJa ? '商品はまだありません' : 'No items scanned'}</b><span>{isJa ? '左側のカメラでバーコードを読み取ってください' : 'Scan a barcode using the camera'}</span></div>
                   )}
                 </div>
                 <footer>
-                  <div><span>合計（税込）</span><strong>¥{cartTotal.toLocaleString()}</strong></div>
-                  <button disabled={!cart.length} onClick={() => { play('tap'); setScreen('settlement') }} type="button">支払いへ</button>
+                  <div><span>{isJa ? '合計（税込）' : 'Total'}</span><strong>¥{cartTotal.toLocaleString()}</strong></div>
+                  <button disabled={!cart.length} onClick={() => { play('tap'); setScreen('settlement') }} type="button">{isJa ? '支払いへ' : 'Proceed to payment'}</button>
                 </footer>
               </section>
 
               <footer className="checkoutFooter">
-                <button onClick={goHome} type="button">はじめに戻る</button>
-                <span>ポイント: {pointChoice} / レジ袋: {bagChoice} / 支払: {paymentChoice}</span>
-                <button onClick={() => setDialog('staff')} type="button">係員を呼ぶ</button>
+                <button onClick={goHome} type="button">{isJa ? 'はじめに戻る' : 'Start over'}</button>
+                <span>{isJa ? `ポイント: ${pointChoice} / レジ袋: ${bagChoice} / 支払: ${paymentChoice}` : `Points: ${pointChoice} / Bag: ${bagChoice} / Payment: ${paymentChoice}`}</span>
+                <button onClick={requestStaff} type="button">{isJa ? '係員を呼ぶ' : 'Call attendant'}</button>
               </footer>
 
               {feedback ? (
@@ -367,69 +356,69 @@ export function App() {
             </section>
           ) : screen === 'settlement' ? (
             <section className="settlementScreen">
-              <KioskProgress current="settlement" />
+              <KioskProgress current="settlement" locale={locale} />
               <div className="settlementLayout">
                 <section className="settlementSummary">
                   <small>PAYMENT</small>
-                  <h1>お支払い</h1>
+                  <h1>{isJa ? 'お支払い' : 'Payment'}</h1>
                   <dl>
-                    <div><dt>商品点数</dt><dd>{cartCount}点</dd></div>
-                    <div><dt>レジ袋</dt><dd>{bagChoice}</dd></div>
-                    <div><dt>支払方法</dt><dd>{paymentChoice}</dd></div>
+                    <div><dt>{isJa ? '商品点数' : 'Items'}</dt><dd>{cartCount}{isJa ? '点' : ''}</dd></div>
+                    <div><dt>{isJa ? 'レジ袋' : 'Bag'}</dt><dd>{bagChoice}</dd></div>
+                    <div><dt>{isJa ? '支払方法' : 'Method'}</dt><dd>{paymentChoice}</dd></div>
                   </dl>
-                  <div className="settlementTotal"><span>合計（税込）</span><strong>¥{cartTotal.toLocaleString()}</strong></div>
+                  <div className="settlementTotal"><span>{isJa ? '合計（税込）' : 'Total'}</span><strong>¥{cartTotal.toLocaleString()}</strong></div>
                 </section>
                 <section aria-live="polite" className="paymentTerminal" role="status">
                   <div className="terminalPulse" aria-hidden="true"><i /><i /><i /></div>
                   <span>PAYMENT TERMINAL</span>
                   <h2>{paymentInstruction}</h2>
-                  <p>決済端末からの応答を待っています</p>
+                  <p>{isJa ? '決済端末からの応答を待っています' : 'Waiting for the payment terminal'}</p>
                   <div className="waitingLine" aria-hidden="true"><i /></div>
                   <b>WAITING FOR PAYMENT</b>
                 </section>
               </div>
               <footer className="settlementFooter">
-                <button onClick={goHome} type="button">取引を中止</button>
-                <span>決済が完了するまで商品をお持ちにならないでください</span>
-                <button onClick={() => setDialog('staff')} type="button">係員を呼ぶ</button>
+                <button onClick={goHome} type="button">{isJa ? '取引を中止' : 'Cancel transaction'}</button>
+                <span>{isJa ? '決済が完了するまで商品をお持ちにならないでください' : 'Please wait until payment is complete'}</span>
+                <button onClick={requestStaff} type="button">{isJa ? '係員を呼ぶ' : 'Call attendant'}</button>
               </footer>
             </section>
           ) : (
             <section className="choiceScreen">
-              <KioskProgress current={screen as 'points' | 'bag' | 'payment'} />
+              <KioskProgress current={screen as 'points' | 'bag' | 'payment'} locale={locale} />
               <div className="choiceCard">
                 <div className="choiceHeading">
                   <small>{screen === 'points' ? 'POINT CARD' : screen === 'bag' ? 'SHOPPING BAG' : 'PAYMENT'}</small>
-                  <h1>{screen === 'points' ? 'ポイントカード' : screen === 'bag' ? 'レジ袋' : 'お支払い'}</h1>
-                  <p>{screen === 'points' ? 'お持ちのカードを選択' : screen === 'bag' ? '必要なサイズを選択' : '支払方法を選択'}</p>
+                  <h1>{screen === 'points' ? (isJa ? 'ポイントカード' : 'Point card') : screen === 'bag' ? (isJa ? 'レジ袋' : 'Shopping bag') : (isJa ? 'お支払い' : 'Payment method')}</h1>
+                  <p>{screen === 'points' ? (isJa ? 'お持ちのカードを選択' : 'Select your point card') : screen === 'bag' ? (isJa ? '必要なサイズを選択' : 'Select a bag') : (isJa ? '支払方法を選択' : 'Select a payment method')}</p>
                 </div>
                 <div className="choiceTiles" data-options={screen === 'payment' ? '4' : '3'}>
                   {screen === 'points' ? (
                     <>
                       <button onClick={() => choosePoint('CIA POINT')} type="button"><i>CP</i><b>CIA POINT</b><small>ポイントカード</small></button>
                       <button onClick={() => choosePoint('提携ポイント')} type="button"><i>＋P</i><b>提携ポイント</b><small>PARTNER POINT</small></button>
-                      <button className="neutral" onClick={() => choosePoint('利用しない')} type="button"><i>—</i><b>利用しない</b><small>ポイントカードなし</small></button>
+                      <button className="neutral" onClick={() => choosePoint('利用しない')} type="button"><i>—</i><b>{isJa ? '利用しない' : 'No point card'}</b><small>{isJa ? 'ポイントカードなし' : 'Continue without points'}</small></button>
                     </>
                   ) : screen === 'bag' ? (
                     <>
-                      <button onClick={() => chooseBag('小 1枚')} type="button"><i>袋</i><b>小</b><small>1枚 / ¥3</small></button>
-                      <button onClick={() => chooseBag('大 1枚')} type="button"><i>袋</i><b>大</b><small>1枚 / ¥5</small></button>
-                      <button className="neutral" onClick={() => chooseBag('不要')} type="button"><i>×</i><b>不要</b><small>袋なし</small></button>
+                      <button onClick={() => chooseBag('小 1枚', findProduct('2900000000032') ?? undefined)} type="button"><i>袋</i><b>{isJa ? '小' : 'Small'}</b><small>{isJa ? '1枚 / ¥3' : '1 bag / ¥3'}</small></button>
+                      <button onClick={() => chooseBag('大 1枚', findProduct('2900000000056') ?? undefined)} type="button"><i>袋</i><b>{isJa ? '大' : 'Large'}</b><small>{isJa ? '1枚 / ¥5' : '1 bag / ¥5'}</small></button>
+                      <button className="neutral" onClick={() => chooseBag('不要')} type="button"><i>×</i><b>{isJa ? '不要' : 'No bag'}</b><small>{isJa ? '袋なし' : 'Continue without a bag'}</small></button>
                     </>
                   ) : (
                     <>
-                      <button onClick={() => choosePayment('クレジットカード')} type="button"><i>▣</i><b>クレジット</b><small>カード</small></button>
-                      <button onClick={() => choosePayment('交通系IC')} type="button"><i>IC</i><b>交通系IC</b><small>タッチ決済</small></button>
-                      <button onClick={() => choosePayment('コード決済')} type="button"><i>▦</i><b>コード決済</b><small>QR・バーコード</small></button>
-                      <button onClick={() => choosePayment('現金')} type="button"><i>¥</i><b>現金</b><small>紙幣・硬貨</small></button>
+                      <button onClick={() => choosePayment('クレジットカード')} type="button"><i>▣</i><b>{isJa ? 'クレジット' : 'Credit card'}</b><small>{isJa ? 'カード' : 'Insert card'}</small></button>
+                      <button onClick={() => choosePayment('交通系IC')} type="button"><i>IC</i><b>{isJa ? '交通系IC' : 'Transit IC'}</b><small>{isJa ? 'タッチ決済' : 'Touch payment'}</small></button>
+                      <button onClick={() => choosePayment('コード決済')} type="button"><i>▦</i><b>{isJa ? 'コード決済' : 'Code payment'}</b><small>{isJa ? 'QR・バーコード' : 'QR or barcode'}</small></button>
+                      <button onClick={() => choosePayment('現金')} type="button"><i>¥</i><b>{isJa ? '現金' : 'Cash'}</b><small>{isJa ? '紙幣・硬貨' : 'Notes and coins'}</small></button>
                     </>
                   )}
                 </div>
               </div>
               <footer className="choiceFooter">
-                <button onClick={() => setScreen(screen === 'points' ? 'home' : screen === 'bag' ? 'points' : 'bag')} type="button">戻る</button>
-                <div><span>ポイント</span><b>{pointChoice}</b><span>レジ袋</span><b>{bagChoice}</b></div>
-                <button onClick={() => setDialog('staff')} type="button">係員</button>
+                <button onClick={() => setScreen(screen === 'points' ? 'home' : screen === 'bag' ? 'points' : 'bag')} type="button">{isJa ? '戻る' : 'Back'}</button>
+                <div><span>{isJa ? 'ポイント' : 'Points'}</span><b>{pointChoice}</b><span>{isJa ? 'レジ袋' : 'Bag'}</span><b>{bagChoice}</b></div>
+                <button onClick={requestStaff} type="button">{isJa ? '係員' : 'Attendant'}</button>
               </footer>
             </section>
           )}
@@ -456,34 +445,26 @@ export function App() {
               if (event.currentTarget === event.target) setDialog(null)
             }}>
               <section aria-modal="true" className="homeDialog" role="dialog">
-                <button aria-label="閉じる" className="dialogClose" onClick={() => setDialog(null)} type="button">×</button>
-                {dialog === 'manual' ? (
-                  <>
-                    <span>MANUAL ENTRY</span><h2>商品コードを入力</h2>
-                    <p>バーコードの下にある数字を入力してください。</p>
-                    <input aria-label="商品コード" inputMode="numeric" onChange={(event) => setManualCode(event.target.value)} placeholder="13桁または8桁の商品コード" value={manualCode} />
-                    <button className="dialogPrimary" disabled={!manualCode.trim()} onClick={submitManualCode} type="button">商品を登録する</button>
-                  </>
-                ) : null}
+                <button aria-label={isJa ? '閉じる' : 'Close'} className="dialogClose" onClick={() => setDialog(null)} type="button">×</button>
                 {dialog === 'guide' ? (
                   <>
-                    <span>HOW TO USE</span><h2>セルフレジの使い方</h2>
-                    <ol><li><b>1</b>ポイント・レジ袋・支払方法を選択</li><li><b>2</b>カメラまたは商品ボタンで商品を登録</li><li><b>3</b>商品と点数を確認して会計を確定</li></ol>
-                    <button className="dialogPrimary" onClick={beginCheckout} type="button">お買い物を始める</button>
+                    <span>HOW TO USE</span><h2>{isJa ? 'セルフレジの使い方' : 'How to use this checkout'}</h2>
+                    <ol><li><b>1</b>{isJa ? 'ポイント・レジ袋・支払方法を選択' : 'Select points, bag and payment method'}</li><li><b>2</b>{isJa ? 'カメラで商品のバーコードを読み取る' : 'Scan each product barcode with the camera'}</li><li><b>3</b>{isJa ? '商品と点数を確認して支払いへ進む' : 'Check your items and proceed to payment'}</li></ol>
+                    <button className="dialogPrimary" onClick={beginCheckout} type="button">{isJa ? 'お会計を始める' : 'Start checkout'}</button>
                   </>
                 ) : null}
-                {dialog === 'staff' ? (
+                {dialog === 'staffConfirm' ? (
                   <>
-                    <span>ASSISTANCE</span><div className="staffSignal"><i /><i /><i /></div><h2>係員を呼び出しました</h2>
-                    <p>そのまま画面の前でお待ちください。</p>
-                    <button className="dialogPrimary" onClick={() => setDialog(null)} type="button">画面に戻る</button>
+                    <span>ASSISTANCE</span><h2>{isJa ? '係員を呼びますか？' : 'Call an attendant?'}</h2>
+                    <p>{isJa ? '操作方法がわからない場合や、お困りの際に係員を呼び出せます。' : 'Call an attendant if you need help with this checkout.'}</p>
+                    <div className="dialogActions"><button onClick={() => setDialog(null)} type="button">{isJa ? '呼ばない' : 'Cancel'}</button><button className="dialogPrimary" onClick={callStaff} type="button">{isJa ? '係員を呼ぶ' : 'Call attendant'}</button></div>
                   </>
                 ) : null}
-                {dialog === 'language' ? (
+                {dialog === 'staffCalled' ? (
                   <>
-                    <span>LANGUAGE</span><h2>表示言語</h2>
-                    <button className="languageChoice selected" onClick={() => setDialog(null)} type="button"><b>日本語</b><small>選択中</small></button>
-                    <p>現在、この端末は日本語でご利用いただけます。</p>
+                    <span>ASSISTANCE</span><div className="staffSignal"><i /><i /><i /></div><h2>{isJa ? '係員を呼び出しました' : 'An attendant has been called'}</h2>
+                    <p>{isJa ? 'そのままお待ちください。混雑状況により、お伺いまでお時間をいただく場合や、対応できない場合がございます。' : 'Please wait at this checkout. During busy periods, assistance may be delayed or unavailable.'}</p>
+                    <button className="dialogPrimary" onClick={() => setDialog(null)} type="button">{isJa ? '画面に戻る' : 'Return to checkout'}</button>
                   </>
                 ) : null}
               </section>
