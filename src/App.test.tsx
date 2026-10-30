@@ -59,7 +59,7 @@ describe('self checkout', () => {
   it('opens management authentication with the four-point Z touch sequence', () => {
     render(<App />)
 
-    for (const corner of ['tl', 'tr', 'br', 'bl']) {
+    for (const corner of ['tl', 'tr', 'bl', 'br']) {
       fireEvent.pointerDown(screen.getByRole('button', { name: `hidden-${corner}` }))
     }
 
@@ -69,7 +69,7 @@ describe('self checkout', () => {
   it('opens management authentication from iPad touch events', () => {
     render(<App />)
 
-    for (const corner of ['tl', 'tr', 'br', 'bl']) {
+    for (const corner of ['tl', 'tr', 'bl', 'br']) {
       fireEvent.touchStart(screen.getByRole('button', { name: `hidden-${corner}` }))
     }
 
@@ -79,7 +79,7 @@ describe('self checkout', () => {
   it('counts a combined pointer and touch event as one corner input', () => {
     render(<App />)
 
-    for (const corner of ['tl', 'tr', 'br', 'bl']) {
+    for (const corner of ['tl', 'tr', 'bl', 'br']) {
       const target = screen.getByRole('button', { name: `hidden-${corner}` })
       fireEvent.pointerDown(target)
       fireEvent.touchStart(target)
@@ -96,9 +96,9 @@ describe('self checkout', () => {
     act(() => vi.advanceTimersByTime(1_400))
     fireEvent.pointerDown(screen.getByRole('button', { name: 'hidden-tr' }))
     act(() => vi.advanceTimersByTime(1_400))
-    fireEvent.pointerDown(screen.getByRole('button', { name: 'hidden-br' }))
-    act(() => vi.advanceTimersByTime(1_400))
     fireEvent.pointerDown(screen.getByRole('button', { name: 'hidden-bl' }))
+    act(() => vi.advanceTimersByTime(1_400))
+    fireEvent.pointerDown(screen.getByRole('button', { name: 'hidden-br' }))
     expect(screen.getByRole('heading', { name: 'システムパスワード' })).toBeInTheDocument()
     vi.useRealTimers()
   })
@@ -109,7 +109,7 @@ describe('self checkout', () => {
 
     fireEvent.pointerDown(screen.getByRole('button', { name: 'hidden-tl' }))
     act(() => vi.advanceTimersByTime(1_501))
-    for (const corner of ['tr', 'br', 'bl']) {
+    for (const corner of ['tr', 'bl', 'br']) {
       fireEvent.pointerDown(screen.getByRole('button', { name: `hidden-${corner}` }))
     }
     expect(screen.queryByRole('heading', { name: 'システムパスワード' })).not.toBeInTheDocument()

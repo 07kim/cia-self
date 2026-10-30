@@ -15,7 +15,7 @@ type HomeDialog = 'manual' | 'guide' | 'staff' | 'language' | null
 type CartLine = Product & { qty: number }
 type Feedback = { tone: 'success' | 'error'; title: string; detail: string } | null
 
-const corners: Corner[] = ['tl', 'tr', 'br', 'bl']
+const corners: Corner[] = ['tl', 'tr', 'bl', 'br']
 const Z_SEQUENCE_LIMIT_MS = 1_500
 
 export function App() {
