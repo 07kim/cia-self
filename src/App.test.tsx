@@ -18,7 +18,7 @@ describe('self checkout', () => {
     })
   })
 
-  it('completes the staged checkout and adds a registered item', async () => {
+  it('stops at payment after adding a registered item', async () => {
     render(<App />)
     expect(screen.getByRole('heading', { name: 'CIA MART 会計端末' })).toBeInTheDocument()
     expect(screen.queryByText('セルフレジ')).not.toBeInTheDocument()
@@ -33,8 +33,11 @@ describe('self checkout', () => {
 
     expect(await screen.findAllByText('梅おにぎり')).toHaveLength(2)
     expect(screen.getAllByText((_, element) => element?.textContent === '¥160').length).toBeGreaterThan(0)
-    fireEvent.click(screen.getByRole('button', { name: 'お会計を確定' }))
-    expect(screen.getByRole('heading', { name: 'ありがとうございました' })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: '支払いへ' }))
+    expect(screen.getByRole('heading', { name: 'お支払い' })).toBeInTheDocument()
+    expect(screen.getByText('決済端末からの応答を待っています')).toBeVisible()
+    expect(screen.queryByRole('button', { name: /支払い完了/ })).not.toBeInTheDocument()
+    expect(screen.queryByText('ありがとうございました')).not.toBeInTheDocument()
   })
 
   it('opens every home support menu and changes display mode', () => {

@@ -9,7 +9,7 @@ import {
 import { findProduct, products, type Product } from './catalog'
 import { searchTransactions, total, type Transaction } from './data'
 
-type Screen = 'home' | 'points' | 'bag' | 'payment' | 'checkout' | 'complete' | 'lock' | 'employee' | 'history'
+type Screen = 'home' | 'points' | 'bag' | 'payment' | 'checkout' | 'settlement' | 'lock' | 'employee' | 'history'
 type Corner = 'tl' | 'tr' | 'br' | 'bl'
 type HomeDialog = 'manual' | 'guide' | 'staff' | 'language' | null
 type EmployeeView = 'menu' | 'catalog' | 'terminal' | 'settings'
@@ -19,13 +19,13 @@ type Feedback = { tone: 'success' | 'error'; title: string; detail: string } | n
 const corners: Corner[] = ['tl', 'tr', 'bl', 'br']
 const Z_SEQUENCE_LIMIT_MS = 1_500
 
-function KioskProgress({ current }: { current: 'points' | 'bag' | 'payment' | 'checkout' | 'complete' }) {
+function KioskProgress({ current }: { current: 'points' | 'bag' | 'payment' | 'checkout' | 'settlement' }) {
   const steps = [
     ['points', 'ポイント'],
     ['bag', 'レジ袋'],
     ['payment', '支払方法'],
     ['checkout', '商品登録'],
-    ['complete', '完了'],
+    ['settlement', 'お支払い'],
   ] as const
   const currentIndex = steps.findIndex(([id]) => id === current)
   return (
@@ -95,7 +95,7 @@ export function App() {
       window.clearTimeout(timer.current)
       timer.current = window.setTimeout(
         goHome,
-        ['points', 'bag', 'payment', 'checkout', 'complete'].includes(screen) ? 60_000 : 10_000,
+        ['points', 'bag', 'payment', 'checkout', 'settlement'].includes(screen) ? 60_000 : 10_000,
       )
     }
     reset()
@@ -248,10 +248,17 @@ export function App() {
   const cartTotal = cart.reduce((sum, line) => sum + line.price * line.qty, 0)
   const cartCount = cart.reduce((sum, line) => sum + line.qty, 0)
   const results = searchTransactions(query)
+  const paymentInstruction = paymentChoice === 'クレジットカード'
+    ? 'カードを決済端末に挿入してください'
+    : paymentChoice === '交通系IC'
+      ? 'カードまたは端末をタッチしてください'
+      : paymentChoice === 'コード決済'
+        ? '決済コードを読み取ってください'
+        : '現金を決済端末へ投入してください'
 
   return (
     <main className={`app ${screen}${largeText ? ' largeText' : ''}`}>
-      {(['home', 'points', 'bag', 'payment', 'checkout', 'complete'] as Screen[]).includes(screen) ? (
+      {(['home', 'points', 'bag', 'payment', 'checkout', 'settlement'] as Screen[]).includes(screen) ? (
         <>
           {screen === 'home' ? (
             <section className="homeScreen">
@@ -341,7 +348,7 @@ export function App() {
                 </div>
                 <footer>
                   <div><span>合計（税込）</span><strong>¥{cartTotal.toLocaleString()}</strong></div>
-                  <button disabled={!cart.length} onClick={() => { play('complete'); setScreen('complete') }} type="button">お会計を確定</button>
+                  <button disabled={!cart.length} onClick={() => { play('tap'); setScreen('settlement') }} type="button">支払いへ</button>
                 </footer>
               </section>
 
@@ -358,21 +365,34 @@ export function App() {
                 </div>
               ) : null}
             </section>
-          ) : screen === 'complete' ? (
-            <section className="completeScreen">
-              <KioskProgress current="complete" />
-              <div className="completeCard">
-                <i aria-hidden="true">✓</i>
-                <span>お会計完了</span>
-                <h1>ありがとうございました</h1>
-                <dl>
-                  <div><dt>点数</dt><dd>{cartCount}点</dd></div>
-                  <div><dt>レジ袋</dt><dd>{bagChoice}</dd></div>
-                  <div><dt>支払</dt><dd>{paymentChoice}</dd></div>
-                  <div><dt>合計</dt><dd>¥{cartTotal.toLocaleString()}</dd></div>
-                </dl>
-                <button onClick={goHome} type="button">はじめに戻る</button>
+          ) : screen === 'settlement' ? (
+            <section className="settlementScreen">
+              <KioskProgress current="settlement" />
+              <div className="settlementLayout">
+                <section className="settlementSummary">
+                  <small>PAYMENT</small>
+                  <h1>お支払い</h1>
+                  <dl>
+                    <div><dt>商品点数</dt><dd>{cartCount}点</dd></div>
+                    <div><dt>レジ袋</dt><dd>{bagChoice}</dd></div>
+                    <div><dt>支払方法</dt><dd>{paymentChoice}</dd></div>
+                  </dl>
+                  <div className="settlementTotal"><span>合計（税込）</span><strong>¥{cartTotal.toLocaleString()}</strong></div>
+                </section>
+                <section aria-live="polite" className="paymentTerminal" role="status">
+                  <div className="terminalPulse" aria-hidden="true"><i /><i /><i /></div>
+                  <span>PAYMENT TERMINAL</span>
+                  <h2>{paymentInstruction}</h2>
+                  <p>決済端末からの応答を待っています</p>
+                  <div className="waitingLine" aria-hidden="true"><i /></div>
+                  <b>WAITING FOR PAYMENT</b>
+                </section>
               </div>
+              <footer className="settlementFooter">
+                <button onClick={goHome} type="button">取引を中止</button>
+                <span>決済が完了するまで商品をお持ちにならないでください</span>
+                <button onClick={() => setDialog('staff')} type="button">係員を呼ぶ</button>
+              </footer>
             </section>
           ) : (
             <section className="choiceScreen">
@@ -524,7 +544,7 @@ export function App() {
               <div className="thead"><span>時刻</span><span>取引番号</span><span>利用者</span><span>社員ID</span><span>合計</span></div>
               {results.map((transaction) => (
                 <button className={selected?.id === transaction.id ? 'active' : ''} key={transaction.id} onClick={() => setSelected(transaction)}>
-                  <span>{transaction.time}</span><span>{transaction.id}</span><span>{transaction.name}</span><span>{transaction.employeeId}</span><strong>¥{total(transaction).toLocaleString()}</strong>
+                  <span data-label="時刻">{transaction.time}</span><span data-label="取引番号">{transaction.id}</span><span data-label="利用者">{transaction.name}</span><span data-label="社員ID">{transaction.employeeId}</span><strong data-label="合計">¥{total(transaction).toLocaleString()}</strong>
                 </button>
               ))}
               {!results.length ? <p className="empty">該当する履歴はありません</p> : null}

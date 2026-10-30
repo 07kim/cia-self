@@ -746,6 +746,70 @@ button { cursor: pointer; }
 .completeCard dd { margin: 0; font-weight: 900; }
 .completeCard button { width: 100%; margin-top: 14px; padding: 17px; border: 0; border-radius: 12px; background: var(--blue); color: #fff; font-weight: 900; }
 
+.settlementScreen {
+  min-height: 100dvh;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: clamp(20px, 3vh, 34px);
+  padding: clamp(20px, 3vw, 44px);
+  background: #eef2f5;
+}
+.settlementLayout {
+  width: min(1320px, 100%);
+  align-self: center;
+  justify-self: center;
+  display: grid;
+  grid-template-columns: minmax(320px, .78fr) minmax(480px, 1.22fr);
+  gap: clamp(18px, 2.4vw, 34px);
+}
+.settlementSummary, .paymentTerminal {
+  min-height: 440px;
+  border-radius: 24px;
+  background: #fff;
+}
+.settlementSummary { padding: clamp(28px, 4vw, 52px); }
+.settlementSummary > small { color: var(--blue); font-size: 12px; font-weight: 900; letter-spacing: .18em; }
+.settlementSummary h1 { margin: 8px 0 32px; color: var(--navy); font-size: clamp(48px, 5vw, 76px); line-height: 1; }
+.settlementSummary dl { margin: 0; }
+.settlementSummary dl div { display: flex; justify-content: space-between; gap: 20px; padding: 14px 0; border-bottom: 1px solid #dce4ea; }
+.settlementSummary dt { color: #6e7e8d; }
+.settlementSummary dd { margin: 0; color: #25394d; font-weight: 900; }
+.settlementTotal { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; margin-top: 30px; }
+.settlementTotal span { color: #5d6e7e; font-weight: 800; }
+.settlementTotal strong { color: var(--navy); font-size: clamp(40px, 5vw, 70px); line-height: .9; }
+.paymentTerminal {
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 12px;
+  padding: clamp(34px, 5vw, 68px);
+  background: var(--blue);
+  color: #fff;
+  text-align: center;
+}
+.paymentTerminal > span { color: #cfe2ff; font-size: 12px; font-weight: 900; letter-spacing: .2em; }
+.paymentTerminal h2 { max-width: 720px; margin: 10px 0 0; font-size: clamp(30px, 4vw, 54px); line-height: 1.25; }
+.paymentTerminal p { margin: 4px 0 0; color: #dceaff; font-size: clamp(15px, 1.6vw, 20px); font-weight: 700; }
+.paymentTerminal > b { color: #cfe2ff; font-size: 11px; letter-spacing: .16em; }
+.terminalPulse { position: relative; width: 108px; aspect-ratio: 1; margin-bottom: 10px; }
+.terminalPulse i { position: absolute; inset: 0; border: 4px solid #fff; border-radius: 50%; animation: terminal-pulse 2.4s ease-out infinite; }
+.terminalPulse i:nth-child(2) { animation-delay: -.8s; }
+.terminalPulse i:nth-child(3) { animation-delay: -1.6s; }
+.waitingLine { width: min(360px, 76%); height: 6px; margin: 18px 0 2px; overflow: hidden; border-radius: 999px; background: #ffffff35; }
+.waitingLine i { display: block; width: 35%; height: 100%; border-radius: inherit; background: #fff; animation: waiting-line 1.8s ease-in-out infinite; }
+.settlementFooter {
+  display: grid;
+  grid-template-columns: 180px 1fr 180px;
+  align-items: stretch;
+  min-height: 64px;
+  overflow: hidden;
+  border: 1px solid #cbd6df;
+  border-radius: 14px;
+  background: #fff;
+}
+.settlementFooter button { border: 0; background: #fff; color: var(--blue-dark); font-weight: 900; }
+.settlementFooter span { display: grid; place-items: center; border-right: 1px solid #dbe3e9; border-left: 1px solid #dbe3e9; color: #637586; font-size: 13px; text-align: center; }
+
 .corner {
   position: fixed;
   z-index: 12;
@@ -881,23 +945,23 @@ button { cursor: pointer; }
 .settingsList span { color: #627486; }
 
 .admin { min-height: 100dvh; background: #f2f5f7; }
-.admin > header { height: 88px; display: flex; align-items: center; justify-content: space-between; padding: 0 28px; background: var(--navy); color: #fff; }
-.admin h1 { margin: 3px 0 0; font-size: 28px; }
+.admin > header { min-height: 104px; display: flex; align-items: center; justify-content: space-between; padding: 18px clamp(24px, 4vw, 54px); background: var(--navy); color: #fff; }
+.admin h1 { margin: 3px 0 0; font-size: clamp(32px, 4vw, 48px); }
 .admin header span { color: #9bb0c3; font-size: 11px; letter-spacing: .14em; }
 .admin header button { padding: 13px 18px; border: 1px solid #ffffff55; border-radius: 9px; background: #fff1; color: #fff; }
-.toolbar { display: flex; gap: 14px; align-items: center; padding: 20px 28px; border-bottom: 1px solid var(--line); background: #fff; }
-.toolbar input { flex: 1; max-width: 560px; padding: 14px 16px; border: 1px solid #b6c4cf; border-radius: 9px; font-size: 16px; }
+.toolbar { display: flex; gap: 18px; align-items: center; padding: 22px clamp(24px, 4vw, 54px); border-bottom: 1px solid var(--line); background: #fff; }
+.toolbar input { flex: 1; max-width: 760px; padding: 17px 20px; border: 1px solid #b6c4cf; border-radius: 10px; font-size: 18px; }
 .toolbar b { color: #607385; }
-.history { display: grid; grid-template-columns: minmax(560px, 1.4fr) minmax(300px, .8fr); gap: 18px; padding: 22px; }
+.admin .history { display: grid; grid-template-columns: minmax(620px, 1.45fr) minmax(340px, .85fr); gap: clamp(18px, 2vw, 30px); padding: clamp(22px, 3vw, 46px); }
 .table, .detail { overflow: hidden; border: 1px solid var(--line); border-radius: 14px; background: #fff; }
-.thead, .table > button { display: grid; grid-template-columns: 70px 130px 1fr 90px 90px; gap: 12px; align-items: center; padding: 14px 18px; }
+.thead, .table > button { display: grid; grid-template-columns: 82px 150px 1fr 110px 110px; gap: 16px; align-items: center; padding: 19px 22px; }
 .thead { background: #e8eef3; color: #5e7182; font-size: 12px; font-weight: 800; }
-.table > button { width: 100%; border: 0; border-top: 1px solid #e6ecf0; background: #fff; text-align: left; }
+.table > button { width: 100%; min-height: 72px; border: 0; border-top: 1px solid #e6ecf0; background: #fff; font-size: 16px; text-align: left; }
 .table > button:hover, .table > button.active { background: #edf5ff; }
 .table > button strong { text-align: right; }
-.detail { padding: 22px; }
+.detail { padding: clamp(24px, 3vw, 38px); font-size: 16px; }
 .detail > span { color: var(--blue); font-size: 11px; letter-spacing: .12em; }
-.detail h2 { margin: 8px 0 20px; }
+.detail h2 { margin: 8px 0 24px; font-size: 32px; }
 .detail dl { margin: 0 0 22px; }
 .detail dl div { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e2e8ed; }
 .detail dt { color: #6c7d8d; }
@@ -918,12 +982,15 @@ button { cursor: pointer; }
 }
 @keyframes scan { 0%, 100% { translate: 0 -62px; } 50% { translate: 0 62px; } }
 @keyframes staffSignal { to { opacity: .45; scale: 1 .75; } }
+@keyframes terminal-pulse { 0% { opacity: 1; scale: .28; } 78%, 100% { opacity: 0; scale: 1; } }
+@keyframes waiting-line { 0% { translate: -120% 0; } 55%, 100% { translate: 310% 0; } }
 
 @media (max-width: 1000px) {
   .homeScreen { grid-template-columns: 1fr; padding: 30px; }
   .homeLaunch { grid-template-columns: minmax(0, 2.4fr) minmax(210px, .8fr); }
   .checkoutGrid { grid-template-columns: minmax(330px, .9fr) minmax(440px, 1.1fr); }
-  .history { grid-template-columns: 1fr; }
+  .admin .history { grid-template-columns: 1fr; }
+  .detail { min-height: 280px; }
 }
 @media (max-width: 900px) {
   .brand { height: 68px; padding: 0 20px; }
@@ -944,12 +1011,41 @@ button { cursor: pointer; }
   .checkoutGrid > .kioskProgress { grid-column: 1; }
   .cameraFrame { height: 340px; }
   .checkoutFooter { grid-column: 1; }
+  .settlementLayout { grid-template-columns: 1fr; }
+  .settlementSummary, .paymentTerminal { min-height: 340px; }
+  .settlementFooter { grid-template-columns: 130px 1fr 130px; }
   .feedback { min-width: 0; width: calc(100% - 28px); }
   .choiceTiles[data-options='3'], .choiceTiles[data-options='4'] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .choiceFooter { grid-template-columns: 100px 1fr 100px; }
   .employeeTiles { grid-template-columns: 1fr; }
   .thead, .table > button { grid-template-columns: 58px 1fr 85px 75px; }
   .thead span:nth-child(2), .table > button span:nth-child(2) { display: none; }
+}
+@media (max-width: 760px) {
+  .admin > header { align-items: flex-start; min-height: 92px; padding: 16px; }
+  .admin header button { padding: 10px 12px; }
+  .toolbar { padding: 14px; }
+  .toolbar input { min-width: 0; padding: 14px; font-size: 16px; }
+  .admin .history { gap: 14px; padding: 14px; }
+  .table { border: 0; background: transparent; }
+  .thead { display: none; }
+  .table > button {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px 20px;
+    min-height: 0;
+    margin-bottom: 12px;
+    padding: 18px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    font-size: 17px;
+  }
+  .table > button span:nth-child(2) { display: grid; }
+  .table > button span, .table > button strong { display: grid; gap: 4px; text-align: left; }
+  .table > button span::before, .table > button strong::before { color: #7a8996; content: attr(data-label); font-size: 10px; font-weight: 800; letter-spacing: .08em; }
+  .detail { padding: 22px; font-size: 16px; }
+  .settlementScreen { padding: 14px; }
+  .settlementFooter { grid-template-columns: 1fr 1fr; }
+  .settlementFooter span { display: none; }
 }
 @media (max-width: 600px) {
   .kioskProgress span { min-height: 48px; gap: 4px; font-size: 9px; }
@@ -964,6 +1060,7 @@ button { cursor: pointer; }
   .startButton { min-height: 340px; }
   .startVisual { right: -10%; width: 240px; }
   .homeAssist { grid-template-columns: 1fr; }
+  .settlementSummary, .paymentTerminal { min-height: 300px; padding: 24px; border-radius: 18px; }
   .choiceFooter { grid-template-columns: 76px 1fr 76px; }
   .choiceFooter > div { flex-wrap: wrap; gap: 5px 8px; padding: 8px; }
   .quickProducts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
