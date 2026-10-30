@@ -31,6 +31,8 @@ describe('self checkout', () => {
   it('opens every home support menu and changes display mode', () => {
     render(<App />)
 
+    expect(screen.queryByRole('banner')).not.toBeInTheDocument()
+
     fireEvent.click(screen.getByRole('button', { name: /商品コードを入力/ }))
     expect(screen.getByRole('dialog')).toHaveTextContent('商品コードを入力')
     fireEvent.click(screen.getByRole('button', { name: '閉じる' }))
@@ -49,6 +51,9 @@ describe('self checkout', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /文字を大きくする/ }))
     expect(screen.getByRole('button', { name: /標準表示に戻す/ })).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: /効果音をオフにする/ }))
+    expect(screen.getByRole('button', { name: /効果音をオンにする/ })).toBeInTheDocument()
   })
 
   it('opens management authentication with the four-point Z touch sequence', () => {

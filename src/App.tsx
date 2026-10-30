@@ -179,24 +179,10 @@ export function App() {
     <main className={`app ${screen}${largeText ? ' largeText' : ''}`}>
       {(screen === 'home' || screen === 'checkout') ? (
         <>
-          <header className="brand">
-            <div className="brandMark"><i />CIA MART</div>
-            <span>セルフレジ</span>
-            <small>お支払いまで画面の案内に沿って操作してください</small>
-            <button
-              aria-label={muted ? '効果音をオンにする' : '効果音をオフにする'}
-              className="soundButton"
-              onClick={() => { void unlock(); toggleMuted() }}
-              type="button"
-            >
-              {muted ? 'SOUND OFF' : 'SOUND ON'}
-            </button>
-          </header>
-
           {screen === 'home' ? (
             <section className="homeScreen">
               <div className="homeCopy">
-                <span>SELF CHECKOUT</span>
+                <div className="compactBrand"><i /><b>CIA MART</b><small>SELF CHECKOUT</small></div>
                 <h1>いらっしゃいませ</h1>
                 <p>商品のバーコードをカメラにかざして<br />お買い物を始めてください。</p>
                 <div className="homeVisual" aria-hidden="true">
@@ -226,6 +212,13 @@ export function App() {
                 <button className="menuButton display" onClick={() => setLargeText((value) => !value)} type="button">
                   <i aria-hidden="true">Aa</i><span><b>{largeText ? '標準表示に戻す' : '文字を大きくする'}</b><small>画面表示</small></span>
                 </button>
+                <button
+                  className="menuButton sound"
+                  onClick={() => { void unlock(); toggleMuted() }}
+                  type="button"
+                >
+                  <i aria-hidden="true">♪</i><span><b>{muted ? '効果音をオンにする' : '効果音をオフにする'}</b><small>{muted ? 'SOUND OFF' : 'SOUND ON'}</small></span>
+                </button>
               </div>
               <div className="homeGuide">
                 <div><b>1</b><span><small>SCAN</small>バーコードをかざす</span></div>
@@ -236,7 +229,10 @@ export function App() {
           ) : (
             <section className="checkoutGrid">
               <section className="scanPanel">
-                <header><span><small>STEP 1</small>商品を読み取る</span><b>SCAN ITEM</b></header>
+                <header>
+                  <span><small>STEP 1</small>商品を読み取る</span>
+                  <div className="panelActions"><b>SCAN ITEM</b><button onClick={() => { void unlock(); toggleMuted() }} type="button">{muted ? '音声 OFF' : '音声 ON'}</button></div>
+                </header>
                 <div className={`cameraFrame ${scannerState}`}>
                   <video aria-label="バーコード読取カメラ" muted playsInline ref={videoRef} />
                   <div className="scanGuide" aria-hidden="true"><i /><span>バーコードを枠内に合わせてください</span></div>
