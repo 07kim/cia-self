@@ -27,4 +27,37 @@ describe('self checkout', () => {
     expect(await screen.findAllByText('梅おにぎり')).toHaveLength(2)
     expect(screen.getAllByText((_, element) => element?.textContent === '¥160').length).toBeGreaterThan(0)
   })
+
+  it('opens every home support menu and changes display mode', () => {
+    render(<App />)
+
+    fireEvent.click(screen.getByRole('button', { name: /商品コードを入力/ }))
+    expect(screen.getByRole('dialog')).toHaveTextContent('商品コードを入力')
+    fireEvent.click(screen.getByRole('button', { name: '閉じる' }))
+
+    fireEvent.click(screen.getByRole('button', { name: /使い方を見る/ }))
+    expect(screen.getByRole('dialog')).toHaveTextContent('セルフレジの使い方')
+    fireEvent.click(screen.getByRole('button', { name: '閉じる' }))
+
+    fireEvent.click(screen.getByRole('button', { name: /係員を呼ぶ/ }))
+    expect(screen.getByRole('dialog')).toHaveTextContent('係員を呼び出しました')
+    fireEvent.click(screen.getByRole('button', { name: '閉じる' }))
+
+    fireEvent.click(screen.getByRole('button', { name: /日本語/ }))
+    expect(screen.getByRole('dialog')).toHaveTextContent('表示言語')
+    fireEvent.click(screen.getByRole('button', { name: '閉じる' }))
+
+    fireEvent.click(screen.getByRole('button', { name: /文字を大きくする/ }))
+    expect(screen.getByRole('button', { name: /標準表示に戻す/ })).toBeInTheDocument()
+  })
+
+  it('opens management authentication with the four-point Z touch sequence', () => {
+    render(<App />)
+
+    for (const corner of ['tl', 'tr', 'br', 'bl']) {
+      fireEvent.pointerDown(screen.getByRole('button', { name: `hidden-${corner}` }))
+    }
+
+    expect(screen.getByRole('heading', { name: 'システムパスワード' })).toBeInTheDocument()
+  })
 })

@@ -11,6 +11,7 @@ import { searchTransactions, total, type Transaction } from './data'
 
 type Screen = 'home' | 'checkout' | 'lock' | 'history'
 type Corner = 'tl' | 'tr' | 'br' | 'bl'
+type HomeDialog = 'manual' | 'guide' | 'staff' | 'language' | null
 type CartLine = Product & { qty: number }
 type Feedback = { tone: 'success' | 'error'; title: string; detail: string } | null
 
@@ -26,11 +27,15 @@ export function App() {
   const [cart, setCart] = useState<CartLine[]>([])
   const [scannerState, setScannerState] = useState<ScannerState>('idle')
   const [feedback, setFeedback] = useState<Feedback>(null)
+  const [dialog, setDialog] = useState<HomeDialog>(null)
+  const [manualCode, setManualCode] = useState('')
+  const [largeText, setLargeText] = useState(false)
   const timer = useRef<number>(0)
   const feedbackTimer = useRef<number>(0)
   const videoRef = useRef<HTMLVideoElement>(null)
   const scanner = useRef<ScannerSession | null>(null)
   const lastRead = useRef({ code: '', at: 0 })
+  const sequenceRef = useRef(0)
   const { muted, play, toggleMuted, unlock } = useAudio()
 
   const goHome = useCallback(() => {
@@ -45,6 +50,9 @@ export function App() {
     setCart([])
     setScannerState('idle')
     setFeedback(null)
+    setDialog(null)
+    setManualCode('')
+    sequenceRef.current = 0
   }, [])
 
   useEffect(() => {
@@ -115,14 +123,32 @@ export function App() {
   }, [screen, startScanner])
 
   const touchCorner = (corner: Corner) => {
-    const next = corner === corners[sequence] ? sequence + 1 : corner === 'tl' ? 1 : 0
+    const current = sequenceRef.current
+    const next = corner === corners[current] ? current + 1 : corner === 'tl' ? 1 : 0
+    sequenceRef.current = next
     setSequence(next)
     if (next === 4) {
       scanner.current?.stop()
       scanner.current = null
       setSequence(0)
+      sequenceRef.current = 0
       setScreen('lock')
     }
+  }
+
+  const beginCheckout = () => {
+    void unlock().then(() => play('tap'))
+    setScannerState('requesting-permission')
+    setDialog(null)
+    setScreen('checkout')
+  }
+
+  const submitManualCode = () => {
+    const code = manualCode.normalize('NFKC').replace(/\s/g, '')
+    if (!code) return
+    beginCheckout()
+    onBarcode(code)
+    setManualCode('')
   }
 
   const authenticate = () => {
@@ -150,7 +176,7 @@ export function App() {
   const results = searchTransactions(query)
 
   return (
-    <main className={`app ${screen}`}>
+    <main className={`app ${screen}${largeText ? ' largeText' : ''}`}>
       {(screen === 'home' || screen === 'checkout') ? (
         <>
           <header className="brand">
@@ -180,18 +206,27 @@ export function App() {
                   <b>バーコードをカメラで読み取ります</b>
                 </div>
               </div>
-              <button
-                className="startButton"
-                onClick={() => {
-                  void unlock().then(() => play('tap'))
-                  setScannerState('requesting-permission')
-                  setScreen('checkout')
-                }}
-                type="button"
-              >
-                <span><small>画面をタッチ</small>お買い物を始める</span>
-                <b aria-hidden="true">→</b>
-              </button>
+              <div className="homeMenu">
+                <button className="startButton" onClick={beginCheckout} type="button">
+                  <span><small>画面をタッチ</small>お買い物を始める</span>
+                  <b aria-hidden="true">→</b>
+                </button>
+                <button className="menuButton code" onClick={() => setDialog('manual')} type="button">
+                  <i aria-hidden="true">▥</i><span><b>商品コードを入力</b><small>カメラを使わずに登録</small></span>
+                </button>
+                <button className="menuButton guide" onClick={() => setDialog('guide')} type="button">
+                  <i aria-hidden="true">?</i><span><b>使い方を見る</b><small>お買い物の手順</small></span>
+                </button>
+                <button className="menuButton staff" onClick={() => setDialog('staff')} type="button">
+                  <i aria-hidden="true">●</i><span><b>係員を呼ぶ</b><small>お困りのとき</small></span>
+                </button>
+                <button className="menuButton language" onClick={() => setDialog('language')} type="button">
+                  <i aria-hidden="true">文</i><span><b>日本語</b><small>LANGUAGE</small></span>
+                </button>
+                <button className="menuButton display" onClick={() => setLargeText((value) => !value)} type="button">
+                  <i aria-hidden="true">Aa</i><span><b>{largeText ? '標準表示に戻す' : '文字を大きくする'}</b><small>画面表示</small></span>
+                </button>
+              </div>
               <div className="homeGuide">
                 <div><b>1</b><span><small>SCAN</small>バーコードをかざす</span></div>
                 <div><b>2</b><span><small>CHECK</small>商品・点数を確認</span></div>
@@ -247,7 +282,7 @@ export function App() {
               <footer className="checkoutFooter">
                 <button onClick={goHome} type="button">はじめに戻る</button>
                 <span>お困りの場合は係員をお呼びください</span>
-                <button type="button">係員を呼ぶ</button>
+                <button onClick={() => setDialog('staff')} type="button">係員を呼ぶ</button>
               </footer>
 
               {feedback ? (
@@ -262,12 +297,54 @@ export function App() {
           {corners.map((corner) => (
             <button
               aria-label={`hidden-${corner}`}
-              className={`corner ${corner}`}
+              className={`corner ${corner}${sequence === corners.indexOf(corner) + 1 ? ' touched' : ''}`}
               key={corner}
-              onClick={() => touchCorner(corner)}
+              onPointerDown={(event) => {
+                event.preventDefault()
+                touchCorner(corner)
+              }}
               type="button"
             ><i /></button>
           ))}
+
+          {dialog ? (
+            <div className="dialogBackdrop" onPointerDown={(event) => {
+              if (event.currentTarget === event.target) setDialog(null)
+            }}>
+              <section aria-modal="true" className="homeDialog" role="dialog">
+                <button aria-label="閉じる" className="dialogClose" onClick={() => setDialog(null)} type="button">×</button>
+                {dialog === 'manual' ? (
+                  <>
+                    <span>MANUAL ENTRY</span><h2>商品コードを入力</h2>
+                    <p>バーコードの下にある数字を入力してください。</p>
+                    <input aria-label="商品コード" inputMode="numeric" onChange={(event) => setManualCode(event.target.value)} placeholder="13桁または8桁の商品コード" value={manualCode} />
+                    <button className="dialogPrimary" disabled={!manualCode.trim()} onClick={submitManualCode} type="button">商品を登録する</button>
+                  </>
+                ) : null}
+                {dialog === 'guide' ? (
+                  <>
+                    <span>HOW TO USE</span><h2>セルフレジの使い方</h2>
+                    <ol><li><b>1</b>「お買い物を始める」をタッチ</li><li><b>2</b>商品のバーコードをカメラにかざす</li><li><b>3</b>商品と点数を確認して次へ進む</li></ol>
+                    <button className="dialogPrimary" onClick={beginCheckout} type="button">お買い物を始める</button>
+                  </>
+                ) : null}
+                {dialog === 'staff' ? (
+                  <>
+                    <span>ASSISTANCE</span><div className="staffSignal"><i /><i /><i /></div><h2>係員を呼び出しました</h2>
+                    <p>そのまま画面の前でお待ちください。</p>
+                    <button className="dialogPrimary" onClick={() => setDialog(null)} type="button">画面に戻る</button>
+                  </>
+                ) : null}
+                {dialog === 'language' ? (
+                  <>
+                    <span>LANGUAGE</span><h2>表示言語</h2>
+                    <button className="languageChoice selected" onClick={() => setDialog(null)} type="button"><b>日本語</b><small>選択中</small></button>
+                    <p>現在、この端末は日本語でご利用いただけます。</p>
+                  </>
+                ) : null}
+              </section>
+            </div>
+          ) : null}
         </>
       ) : null}
 

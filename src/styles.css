@@ -60,6 +60,7 @@ button { cursor: pointer; }
 }
 .soundButton {
   min-width: 108px;
+  margin-right: 68px;
   padding: 11px 14px;
   border: 1px solid #c7d3de;
   border-radius: 10px;
@@ -73,7 +74,7 @@ button { cursor: pointer; }
 .homeScreen {
   min-height: calc(100dvh - 78px);
   display: grid;
-  grid-template-columns: minmax(0, 1.25fr) minmax(350px, .75fr);
+  grid-template-columns: minmax(340px, .82fr) minmax(520px, 1.18fr);
   grid-template-rows: 1fr auto;
   gap: 30px;
   padding: clamp(32px, 5vh, 64px) clamp(28px, 5vw, 78px) 32px;
@@ -82,8 +83,8 @@ button { cursor: pointer; }
 .homeCopy {
   position: relative;
   align-self: center;
-  min-height: 430px;
-  padding: 42px 46% 42px 46px;
+  min-height: 450px;
+  padding: 38px 38px 220px;
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: 26px;
@@ -100,9 +101,10 @@ button { cursor: pointer; }
 }
 .homeCopy h1 {
   margin: 0;
-  font-size: clamp(42px, 5vw, 72px);
+  font-size: clamp(32px, 3.1vw, 44px);
   line-height: 1.05;
-  letter-spacing: -.055em;
+  letter-spacing: -.045em;
+  white-space: nowrap;
 }
 .homeCopy p {
   margin: 24px 0 0;
@@ -113,7 +115,8 @@ button { cursor: pointer; }
 }
 .homeVisual {
   position: absolute;
-  inset: 0 0 0 57%;
+  inset: auto 0 0;
+  height: 190px;
   display: grid;
   place-items: center;
   overflow: hidden;
@@ -121,8 +124,8 @@ button { cursor: pointer; }
 }
 .homeVisual::before {
   position: absolute;
-  width: 260px;
-  height: 260px;
+  width: 150px;
+  height: 150px;
   border-radius: 50%;
   background: #fff;
   box-shadow: 0 0 0 26px #dcecff;
@@ -130,9 +133,9 @@ button { cursor: pointer; }
 }
 .homeVisual > b {
   position: absolute;
-  right: 24px;
-  bottom: 24px;
-  left: 24px;
+  right: 18px;
+  bottom: 16px;
+  left: auto;
   padding: 12px;
   border-radius: 10px;
   background: #fff;
@@ -143,8 +146,8 @@ button { cursor: pointer; }
 .productShape {
   position: relative;
   z-index: 1;
-  width: 118px;
-  height: 150px;
+  width: 74px;
+  height: 98px;
   border-radius: 14px 14px 30px 30px;
   background: var(--orange);
   box-shadow: 0 14px 28px #2f4c681f;
@@ -173,7 +176,7 @@ button { cursor: pointer; }
 .scanBeam {
   position: absolute;
   z-index: 2;
-  width: 190px;
+  width: 130px;
   height: 4px;
   border-radius: 999px;
   background: #ee4757;
@@ -183,8 +186,8 @@ button { cursor: pointer; }
 .barcode {
   position: absolute;
   z-index: 3;
-  right: 32px;
-  top: 32px;
+  right: 24px;
+  top: 20px;
   display: flex;
   align-items: stretch;
   gap: 3px;
@@ -197,14 +200,20 @@ button { cursor: pointer; }
 .barcode i:nth-child(2n) { width: 5px; }
 .barcode i:nth-child(3n) { width: 1px; }
 
-.startButton {
+.homeMenu {
   align-self: center;
-  min-height: 230px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+.startButton {
+  grid-column: 1 / -1;
+  min-height: 150px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 20px;
-  padding: 36px;
+  padding: 28px 32px;
   border: 0;
   border-radius: 24px;
   background: var(--blue);
@@ -227,6 +236,41 @@ button { cursor: pointer; }
   color: var(--blue);
   font-size: 34px;
 }
+.menuButton {
+  min-height: 92px;
+  display: grid;
+  grid-template-columns: 50px 1fr;
+  gap: 14px;
+  align-items: center;
+  padding: 16px 18px;
+  border: 1px solid #cfdae3;
+  border-radius: 16px;
+  background: #fff;
+  color: #263a4e;
+  text-align: left;
+  transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+.menuButton:hover { border-color: #8bb8f3; box-shadow: 0 8px 20px #23496d12; transform: translateY(-2px); }
+.menuButton:active { transform: translateY(1px); }
+.menuButton > i {
+  display: grid;
+  width: 46px;
+  aspect-ratio: 1;
+  place-items: center;
+  border-radius: 13px;
+  background: #e9f2ff;
+  color: var(--blue);
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 900;
+}
+.menuButton > span { display: grid; gap: 4px; }
+.menuButton b { font-size: 15px; }
+.menuButton small { color: #758595; font-size: 11px; }
+.menuButton.staff > i { background: #fff0e3; color: #cf6712; }
+.menuButton.language > i { background: #e8f7f0; color: var(--green); }
+.menuButton.display { grid-column: 1 / -1; min-height: 76px; }
+.menuButton.display > i { background: #f0ecff; color: #6551b8; }
 .homeGuide {
   grid-column: 1 / -1;
   display: grid;
@@ -432,13 +476,53 @@ button { cursor: pointer; }
 .feedback.error { border-color: #e6b8bd; }
 .feedback.error > i { background: var(--red); }
 
-.corner { position: fixed; z-index: 12; width: 64px; height: 64px; border: 0; background: transparent; }
-.corner i { display: block; width: 100%; height: 100%; border-radius: 50%; opacity: 0; box-shadow: inset 0 0 0 2px #5b99e8; }
-.corner:active i { animation: ripple .5s ease-out; }
+.corner { position: fixed; z-index: 12; width: 96px; height: 96px; border: 0; background: transparent; touch-action: manipulation; }
+.corner i { display: block; width: 100%; height: 100%; border-radius: 50%; opacity: 0; box-shadow: inset 0 0 0 2px #5b99e8; pointer-events: none; }
+.corner:active i, .corner.touched i { animation: ripple .7s ease-out; }
 .tl { top: 0; left: 0; }
 .tr { top: 0; right: 0; }
 .br { right: 0; bottom: 0; }
 .bl { bottom: 0; left: 0; }
+
+.dialogBackdrop {
+  position: fixed;
+  z-index: 30;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: #14283e80;
+  backdrop-filter: blur(5px);
+}
+.homeDialog {
+  position: relative;
+  width: min(560px, 94vw);
+  display: grid;
+  gap: 16px;
+  padding: 34px;
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: 0 28px 80px #10263c42;
+}
+.homeDialog > span { color: var(--blue); font-size: 11px; font-weight: 900; letter-spacing: .15em; }
+.homeDialog h2 { margin: 0; font-size: 30px; }
+.homeDialog p { margin: 0; color: #617284; line-height: 1.7; }
+.homeDialog input { width: 100%; padding: 17px 18px; border: 2px solid #c3cfda; border-radius: 11px; font-size: 20px; }
+.dialogClose { position: absolute; top: 16px; right: 16px; width: 42px; aspect-ratio: 1; border: 0; border-radius: 50%; background: #edf2f6; color: #405367; font-size: 23px; }
+.dialogPrimary { padding: 17px; border: 0; border-radius: 11px; background: var(--blue); color: #fff; font-weight: 900; }
+.dialogPrimary:disabled { background: #d9e0e6; color: #8895a1; }
+.homeDialog ol { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.homeDialog li { display: flex; align-items: center; gap: 13px; padding: 12px; border-radius: 12px; background: #f2f6f9; font-weight: 700; }
+.homeDialog li b { display: grid; width: 34px; aspect-ratio: 1; place-items: center; border-radius: 50%; background: #e2edfb; color: var(--blue); }
+.staffSignal { display: flex; gap: 8px; align-items: end; height: 42px; }
+.staffSignal i { width: 8px; height: 18px; border-radius: 8px; background: var(--orange); animation: staffSignal .9s ease-in-out infinite alternate; }
+.staffSignal i:nth-child(2) { height: 30px; animation-delay: .18s; }
+.staffSignal i:nth-child(3) { height: 40px; animation-delay: .36s; }
+.languageChoice { display: flex; justify-content: space-between; padding: 18px; border: 2px solid var(--blue); border-radius: 12px; background: #eef5ff; color: var(--blue-dark); }
+.languageChoice small { font-weight: 800; }
+.largeText .menuButton b, .largeText .homeGuide span { font-size: 18px; }
+.largeText .menuButton small, .largeText .homeGuide small { font-size: 13px; }
+.largeText .checkoutGrid { font-size: 1.08em; }
 
 .lock { min-height: 100dvh; display: grid; place-items: center; padding: 30px; background: #edf2f6; }
 .lockcard { width: min(620px, 92vw); display: grid; gap: 16px; padding: 34px; border: 1px solid var(--line); border-radius: 22px; background: #fff; box-shadow: 0 24px 70px #20384f26; }
@@ -482,9 +566,10 @@ button { cursor: pointer; }
 @keyframes pulse { 50% { opacity: .35; } }
 @keyframes ripple { from { opacity: .7; scale: .2; } to { opacity: 0; scale: 1.2; } }
 @keyframes scan { 0%, 100% { translate: 0 -62px; } 50% { translate: 0 62px; } }
+@keyframes staffSignal { to { opacity: .45; scale: 1 .75; } }
 
 @media (max-width: 1000px) {
-  .homeScreen { grid-template-columns: minmax(0, 1fr) minmax(300px, .7fr); padding: 30px; }
+  .homeScreen { grid-template-columns: minmax(310px, .76fr) minmax(460px, 1.24fr); padding: 30px; }
   .homeCopy { padding-left: 34px; }
   .checkoutGrid { grid-template-columns: minmax(330px, .9fr) minmax(440px, 1.1fr); }
   .history { grid-template-columns: 1fr; }
@@ -492,7 +577,7 @@ button { cursor: pointer; }
 @media (max-width: 760px) {
   .brand { height: 68px; padding: 0 20px; }
   .brand > span, .brand > small { display: none; }
-  .brand .soundButton { margin-left: auto; }
+  .brand .soundButton { margin-right: 66px; margin-left: auto; }
   .homeScreen { min-height: calc(100dvh - 68px); grid-template-columns: 1fr; grid-template-rows: auto auto auto; gap: 18px; padding: 22px; }
   .homeCopy { min-height: 390px; padding: 28px 28px 200px; }
   .homeCopy p br { display: none; }
@@ -501,8 +586,10 @@ button { cursor: pointer; }
   .productShape { width: 72px; height: 96px; border-radius: 10px 10px 20px 20px; }
   .scanBeam { width: 120px; }
   .homeVisual > b { right: auto; bottom: 12px; left: 12px; padding: 8px 10px; }
+  .homeMenu { grid-template-columns: 1fr; }
   .startButton { min-height: 130px; padding: 25px; border-radius: 18px; }
   .startButton > b { flex-basis: 52px; }
+  .menuButton, .menuButton.display { grid-column: 1; }
   .homeGuide { grid-template-columns: 1fr; }
   .homeGuide div { border-right: 0; border-bottom: 1px solid var(--line); }
   .checkoutGrid { grid-template-columns: 1fr; grid-template-rows: auto auto 60px; padding: 12px; }
