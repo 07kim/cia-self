@@ -66,6 +66,28 @@ describe('self checkout', () => {
     expect(screen.getByRole('heading', { name: 'システムパスワード' })).toBeInTheDocument()
   })
 
+  it('opens management authentication from iPad touch events', () => {
+    render(<App />)
+
+    for (const corner of ['tl', 'tr', 'br', 'bl']) {
+      fireEvent.touchStart(screen.getByRole('button', { name: `hidden-${corner}` }))
+    }
+
+    expect(screen.getByRole('heading', { name: 'システムパスワード' })).toBeInTheDocument()
+  })
+
+  it('counts a combined pointer and touch event as one corner input', () => {
+    render(<App />)
+
+    for (const corner of ['tl', 'tr', 'br', 'bl']) {
+      const target = screen.getByRole('button', { name: `hidden-${corner}` })
+      fireEvent.pointerDown(target)
+      fireEvent.touchStart(target)
+    }
+
+    expect(screen.getByRole('heading', { name: 'システムパスワード' })).toBeInTheDocument()
+  })
+
   it('allows up to 1.5 seconds between each Z touch', () => {
     vi.useFakeTimers()
     render(<App />)

@@ -37,6 +37,7 @@ export function App() {
   const videoRef = useRef<HTMLVideoElement>(null)
   const scanner = useRef<ScannerSession | null>(null)
   const lastRead = useRef({ code: '', at: 0 })
+  const lastCornerInput = useRef<{ corner: Corner | null; at: number }>({ corner: null, at: Number.NEGATIVE_INFINITY })
   const sequenceRef = useRef(0)
   const { muted, play, toggleMuted, unlock } = useAudio()
 
@@ -56,6 +57,7 @@ export function App() {
     setManualCode('')
     window.clearTimeout(sequenceTimer.current)
     sequenceRef.current = 0
+    lastCornerInput.current = { corner: null, at: Number.NEGATIVE_INFINITY }
   }, [])
 
   useEffect(() => {
@@ -147,6 +149,13 @@ export function App() {
     } else if (next === 0) {
       window.clearTimeout(sequenceTimer.current)
     }
+  }
+
+  const handleCornerInput = (corner: Corner, now: number) => {
+    const previous = lastCornerInput.current
+    if (previous.corner === corner && now - previous.at < 500) return
+    lastCornerInput.current = { corner, at: now }
+    touchCorner(corner)
   }
 
   const beginCheckout = () => {
@@ -310,7 +319,11 @@ export function App() {
               key={corner}
               onPointerDown={(event) => {
                 event.preventDefault()
-                touchCorner(corner)
+                handleCornerInput(corner, event.timeStamp)
+              }}
+              onTouchStart={(event) => {
+                event.preventDefault()
+                handleCornerInput(corner, event.timeStamp)
               }}
               type="button"
             ><i /></button>
