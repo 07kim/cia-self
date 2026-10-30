@@ -1,12 +1,12 @@
 # 実装計画
 
 ## Phase 1: 初版
-- 状態: Implemented / publication pending
+- 状態: Published / iPad実機確認 pending
 - 対象: セルフレジ、四隅操作、管理認証、購入履歴検索、商品明細、10秒復帰、レスポンシブ表示。
 - 検証: 型検査、データテスト、本番ビルド、iPad相当画面のブラウザ確認。
 
 ## Phase 2: カメラ式セルフレジUI
-- 状態: Implemented / publication pending
+- 状態: Published / iPad実機確認 pending
 - 対象: iPad横向きブロック型UI、カメラ許可、JAN読取、ローカル商品台帳、買い物かご、未登録表示、重複検知防止、効果音基盤。
 - 主な変更: `src/App.tsx`の画面状態整理、商品台帳、スキャナーサービス、音声サービス、セルフレジ用CSS、テスト、オフラインキャッシュ、製品仕様。
 - 受入条件:
