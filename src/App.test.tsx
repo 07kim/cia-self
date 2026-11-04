@@ -44,6 +44,8 @@ describe('self checkout', () => {
     render(<App />)
 
     expect(screen.queryByRole('button', { name: /商品コード/ })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Switch to English' }).querySelector('svg')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'お会計を始める' }).querySelectorAll('svg')).toHaveLength(3)
 
     fireEvent.click(screen.getByRole('button', { name: /使い方を見る/ }))
     expect(screen.getByRole('dialog')).toHaveTextContent('セルフレジの使い方')
@@ -67,6 +69,7 @@ describe('self checkout', () => {
     fireEvent.click(screen.getByRole('button', { name: 'お会計を始める' }))
     fireEvent.click(screen.getByRole('button', { name: /CIA POINT/ }))
     expect(screen.getByRole('heading', { name: 'ポイントカードを読み取ってください' })).toBeInTheDocument()
+    expect(document.querySelector('.pointReader svg')).toBeInTheDocument()
     expect(screen.getByText('読み取りを待っています')).toBeVisible()
     expect(screen.queryByRole('button', { name: /次へ/ })).not.toBeInTheDocument()
   })

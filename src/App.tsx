@@ -1,4 +1,22 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import {
+  ArrowRight,
+  Banknote,
+  Ban,
+  BellRing,
+  CircleHelp,
+  CreditCard,
+  Languages,
+  Nfc,
+  Package,
+  QrCode,
+  ScanBarcode,
+  ShoppingBag,
+  Type,
+  Volume2,
+  VolumeX,
+  WalletCards,
+} from 'lucide-react'
 import { useAudio } from './audio'
 import {
   scannerErrorState,
@@ -242,30 +260,27 @@ export function App() {
     <main className={`app ${screen}${largeText ? ' largeText' : ''}`}>
       {(['home', 'points', 'pointScan', 'bag', 'payment', 'checkout', 'settlement'] as Screen[]).includes(screen) ? (
         <>
-          <header className="kioskHeader">
-            <div className="compactBrand"><i /><b>CIA MART</b><small>SELF CHECKOUT</small></div>
-            <div className="homeUtilities">
-              <button aria-label={isJa ? 'Switch to English' : '日本語に切り替える'} onClick={() => setLocale(isJa ? 'en' : 'ja')} type="button">文 <span>{isJa ? 'English' : '日本語'}</span></button>
-              <button aria-label={largeText ? (isJa ? '標準表示に戻す' : 'Use standard text size') : (isJa ? '文字を大きくする' : 'Use larger text')} onClick={() => setLargeText((value) => !value)} type="button">Aa <span>{largeText ? (isJa ? '標準' : 'Standard') : (isJa ? '大きく' : 'Larger')}</span></button>
-              <button aria-label={muted ? (isJa ? '効果音をオンにする' : 'Turn sound on') : (isJa ? '効果音をオフにする' : 'Turn sound off')} onClick={() => { void unlock(); toggleMuted() }} type="button">♪ <span>{muted ? 'OFF' : 'ON'}</span></button>
-            </div>
-          </header>
           {screen === 'home' ? (
             <section className="homeScreen">
               <h1 className="visuallyHidden">{isJa ? 'CIA MART 会計端末' : 'CIA MART Checkout'}</h1>
+              <div className="homeUtilities">
+                <button aria-label={isJa ? 'Switch to English' : '日本語に切り替える'} onClick={() => setLocale(isJa ? 'en' : 'ja')} type="button"><Languages aria-hidden="true" /> <span>{isJa ? 'English' : '日本語'}</span></button>
+                <button aria-label={largeText ? (isJa ? '標準表示に戻す' : 'Use standard text size') : (isJa ? '文字を大きくする' : 'Use larger text')} onClick={() => setLargeText((value) => !value)} type="button"><Type aria-hidden="true" /> <span>{largeText ? (isJa ? '標準' : 'Standard') : (isJa ? '大きく' : 'Larger')}</span></button>
+                <button aria-label={muted ? (isJa ? '効果音をオンにする' : 'Turn sound on') : (isJa ? '効果音をオフにする' : 'Turn sound off')} onClick={() => { void unlock(); toggleMuted() }} type="button">{muted ? <VolumeX aria-hidden="true" /> : <Volume2 aria-hidden="true" />} <span>{muted ? 'OFF' : 'ON'}</span></button>
+              </div>
               <div className="homeLaunch">
                 <button aria-label={isJa ? 'お会計を始める' : 'Start checkout'} className="startButton" onClick={beginCheckout} type="button">
-                  <span className="startCopy"><small>{isJa ? 'CHECKOUT' : 'WELCOME'}</small><strong>{isJa ? 'お会計' : 'CHECKOUT'}</strong><b>{isJa ? '商品登録へ進む' : 'Start your purchase'}</b></span>
+                  <span className="startCopy"><small>CIA MART / {isJa ? 'CHECKOUT' : 'WELCOME'}</small><strong>{isJa ? 'お会計' : 'CHECKOUT'}</strong><b>{isJa ? '商品登録へ進む' : 'Start your purchase'}</b></span>
                   <span className="startVisual" aria-hidden="true">
-                    <span className="productShape"><i /><i /><i /></span>
+                    <Package className="heroPackageIcon" />
+                    <ScanBarcode className="heroScanIcon" />
                     <span className="scanBeam" />
-                    <span className="barcode"><i /><i /><i /><i /><i /><i /><i /><i /></span>
                   </span>
-                  <span className="startArrow" aria-hidden="true">→</span>
+                  <span className="startArrow" aria-hidden="true"><ArrowRight /></span>
                 </button>
                 <aside className="homeAssist" aria-label={isJa ? '補助メニュー' : 'Support menu'}>
-                  <button aria-label={isJa ? '使い方を見る' : 'View instructions'} onClick={() => setDialog('guide')} type="button"><i aria-hidden="true">?</i><span><b>{isJa ? '使い方' : 'Help'}</b><small>{isJa ? '操作案内' : 'Instructions'}</small></span></button>
-                  <button aria-label={isJa ? '係員を呼ぶ' : 'Call an attendant'} onClick={requestStaff} type="button"><i aria-hidden="true">●</i><span><b>{isJa ? '係員' : 'Attendant'}</b><small>{isJa ? '呼び出し' : 'Call for help'}</small></span></button>
+                  <button aria-label={isJa ? '使い方を見る' : 'View instructions'} onClick={() => setDialog('guide')} type="button"><i aria-hidden="true"><CircleHelp /></i><span><b>{isJa ? '使い方' : 'Help'}</b><small>{isJa ? '操作案内' : 'Instructions'}</small></span></button>
+                  <button aria-label={isJa ? '係員を呼ぶ' : 'Call an attendant'} onClick={requestStaff} type="button"><i aria-hidden="true"><BellRing /></i><span><b>{isJa ? '係員' : 'Attendant'}</b><small>{isJa ? '呼び出し' : 'Call for help'}</small></span></button>
                 </aside>
               </div>
               <div className="homeGuide">
@@ -279,7 +294,7 @@ export function App() {
             <section className="pointScanScreen">
               <KioskProgress current="points" locale={locale} />
               <div className="pointScanPanel">
-                <div className="pointReader" aria-hidden="true"><i /><i /></div>
+                <div className="pointReader" aria-hidden="true"><Nfc /></div>
                 <small>POINT READER</small>
                 <h1>{isJa ? 'ポイントカードを読み取ってください' : 'Scan your point card'}</h1>
                 <p>{isJa ? `${pointChoice}のカードまたはアプリを、読み取り部へ近づけてください。` : `Hold your ${pointChoice} card or app near the reader.`}</p>
@@ -395,22 +410,22 @@ export function App() {
                 <div className="choiceTiles" data-options={screen === 'payment' ? '4' : '3'}>
                   {screen === 'points' ? (
                     <>
-                      <button onClick={() => choosePoint('CIA POINT')} type="button"><i>CP</i><b>CIA POINT</b><small>ポイントカード</small></button>
-                      <button onClick={() => choosePoint('提携ポイント')} type="button"><i>＋P</i><b>提携ポイント</b><small>PARTNER POINT</small></button>
-                      <button className="neutral" onClick={() => choosePoint('利用しない')} type="button"><i>—</i><b>{isJa ? '利用しない' : 'No point card'}</b><small>{isJa ? 'ポイントカードなし' : 'Continue without points'}</small></button>
+                      <button onClick={() => choosePoint('CIA POINT')} type="button"><i><CreditCard aria-hidden="true" /></i><b>CIA POINT</b><small>ポイントカード</small></button>
+                      <button onClick={() => choosePoint('提携ポイント')} type="button"><i><WalletCards aria-hidden="true" /></i><b>提携ポイント</b><small>PARTNER POINT</small></button>
+                      <button className="neutral" onClick={() => choosePoint('利用しない')} type="button"><i><Ban aria-hidden="true" /></i><b>{isJa ? '利用しない' : 'No point card'}</b><small>{isJa ? 'ポイントカードなし' : 'Continue without points'}</small></button>
                     </>
                   ) : screen === 'bag' ? (
                     <>
-                      <button onClick={() => chooseBag('小 1枚', findProduct('2900000000032') ?? undefined)} type="button"><i>袋</i><b>{isJa ? '小' : 'Small'}</b><small>{isJa ? '1枚 / ¥3' : '1 bag / ¥3'}</small></button>
-                      <button onClick={() => chooseBag('大 1枚', findProduct('2900000000056') ?? undefined)} type="button"><i>袋</i><b>{isJa ? '大' : 'Large'}</b><small>{isJa ? '1枚 / ¥5' : '1 bag / ¥5'}</small></button>
-                      <button className="neutral" onClick={() => chooseBag('不要')} type="button"><i>×</i><b>{isJa ? '不要' : 'No bag'}</b><small>{isJa ? '袋なし' : 'Continue without a bag'}</small></button>
+                      <button onClick={() => chooseBag('小 1枚', findProduct('2900000000032') ?? undefined)} type="button"><i><ShoppingBag aria-hidden="true" /></i><b>{isJa ? '小' : 'Small'}</b><small>{isJa ? '1枚 / ¥3' : '1 bag / ¥3'}</small></button>
+                      <button onClick={() => chooseBag('大 1枚', findProduct('2900000000056') ?? undefined)} type="button"><i><ShoppingBag aria-hidden="true" /></i><b>{isJa ? '大' : 'Large'}</b><small>{isJa ? '1枚 / ¥5' : '1 bag / ¥5'}</small></button>
+                      <button className="neutral" onClick={() => chooseBag('不要')} type="button"><i><Ban aria-hidden="true" /></i><b>{isJa ? '不要' : 'No bag'}</b><small>{isJa ? '袋なし' : 'Continue without a bag'}</small></button>
                     </>
                   ) : (
                     <>
-                      <button onClick={() => choosePayment('クレジットカード')} type="button"><i>▣</i><b>{isJa ? 'クレジット' : 'Credit card'}</b><small>{isJa ? 'カード' : 'Insert card'}</small></button>
-                      <button onClick={() => choosePayment('交通系IC')} type="button"><i>IC</i><b>{isJa ? '交通系IC' : 'Transit IC'}</b><small>{isJa ? 'タッチ決済' : 'Touch payment'}</small></button>
-                      <button onClick={() => choosePayment('コード決済')} type="button"><i>▦</i><b>{isJa ? 'コード決済' : 'Code payment'}</b><small>{isJa ? 'QR・バーコード' : 'QR or barcode'}</small></button>
-                      <button onClick={() => choosePayment('現金')} type="button"><i>¥</i><b>{isJa ? '現金' : 'Cash'}</b><small>{isJa ? '紙幣・硬貨' : 'Notes and coins'}</small></button>
+                      <button onClick={() => choosePayment('クレジットカード')} type="button"><i><CreditCard aria-hidden="true" /></i><b>{isJa ? 'クレジット' : 'Credit card'}</b><small>{isJa ? 'カード' : 'Insert card'}</small></button>
+                      <button onClick={() => choosePayment('交通系IC')} type="button"><i><Nfc aria-hidden="true" /></i><b>{isJa ? '交通系IC' : 'Transit IC'}</b><small>{isJa ? 'タッチ決済' : 'Touch payment'}</small></button>
+                      <button onClick={() => choosePayment('コード決済')} type="button"><i><QrCode aria-hidden="true" /></i><b>{isJa ? 'コード決済' : 'Code payment'}</b><small>{isJa ? 'QR・バーコード' : 'QR or barcode'}</small></button>
+                      <button onClick={() => choosePayment('現金')} type="button"><i><Banknote aria-hidden="true" /></i><b>{isJa ? '現金' : 'Cash'}</b><small>{isJa ? '紙幣・硬貨' : 'Notes and coins'}</small></button>
                     </>
                   )}
                 </div>

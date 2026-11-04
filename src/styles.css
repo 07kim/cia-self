@@ -11,7 +11,7 @@
   --green: #13875f;
   --orange: #f29a2e;
   --red: #cb3e4c;
-  --kiosk-header: 72px;
+  --kiosk-header: 0px;
 }
 
 * { box-sizing: border-box; }
@@ -73,6 +73,7 @@ button { cursor: pointer; }
 }
 
 .homeScreen {
+  position: relative;
   min-height: calc(100dvh - var(--kiosk-header));
   display: grid;
   grid-template-columns: minmax(340px, .82fr) minmax(520px, 1.18fr);
@@ -143,36 +144,6 @@ button { cursor: pointer; }
   text-align: center;
   font-size: 12px;
 }
-.productShape {
-  position: relative;
-  z-index: 1;
-  width: 74px;
-  height: 98px;
-  border-radius: 14px 14px 30px 30px;
-  background: var(--orange);
-  box-shadow: 0 14px 28px #2f4c681f;
-  rotate: -8deg;
-}
-.productShape::before {
-  position: absolute;
-  top: 18px;
-  left: 22px;
-  width: 74px;
-  height: 12px;
-  border-radius: 9px;
-  background: #fff9;
-  content: '';
-}
-.productShape i {
-  position: absolute;
-  right: 20px;
-  bottom: 28px;
-  left: 20px;
-  height: 4px;
-  background: #703f0f55;
-}
-.productShape i:nth-child(2) { bottom: 40px; }
-.productShape i:nth-child(3) { bottom: 52px; }
 .scanBeam {
   position: absolute;
   z-index: 2;
@@ -183,23 +154,6 @@ button { cursor: pointer; }
   box-shadow: 0 0 0 7px #ee475722, 0 0 18px #ee475766;
   animation: scan 2.2s ease-in-out infinite;
 }
-.barcode {
-  position: absolute;
-  z-index: 3;
-  right: 24px;
-  top: 20px;
-  display: flex;
-  align-items: stretch;
-  gap: 3px;
-  height: 38px;
-  padding: 7px;
-  border-radius: 6px;
-  background: #fff;
-}
-.barcode i { width: 2px; background: var(--navy); }
-.barcode i:nth-child(2n) { width: 5px; }
-.barcode i:nth-child(3n) { width: 1px; }
-
 .homeMenu {
   align-self: center;
   display: grid;
@@ -316,25 +270,8 @@ button { cursor: pointer; }
   grid-template-columns: 1fr;
   grid-template-rows: auto minmax(0, 1fr) auto;
   gap: clamp(18px, 2.6vh, 30px);
-  padding: calc(var(--kiosk-header) + clamp(24px, 3vw, 44px)) clamp(28px, 5vw, 72px) clamp(20px, 3vw, 36px);
+  padding: clamp(84px, 9vh, 106px) clamp(28px, 5vw, 72px) clamp(20px, 3vw, 36px);
 }
-.kioskHeader {
-  position: fixed;
-  z-index: 40;
-  top: 0;
-  right: 0;
-  left: 0;
-  height: var(--kiosk-header);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  padding: 0 64px;
-  border-bottom: 1px solid #cfd9e1;
-  background: #fff;
-  box-shadow: 0 3px 16px #263e5410;
-}
-.kioskHeader .compactBrand { margin: 0; }
 .homeHeader {
   display: flex;
   align-items: center;
@@ -342,7 +279,14 @@ button { cursor: pointer; }
   gap: 24px;
 }
 .homeHeader .compactBrand { margin: 0; }
-.homeUtilities { display: flex; gap: 8px; }
+.homeUtilities {
+  position: absolute;
+  z-index: 5;
+  top: 20px;
+  right: clamp(28px, 5vw, 72px);
+  display: flex;
+  gap: 8px;
+}
 .homeUtilities button {
   min-height: 46px;
   display: flex;
@@ -356,6 +300,12 @@ button { cursor: pointer; }
   font-weight: 700;
 }
 .homeUtilities button span { color: #67798a; font-size: 11px; }
+.homeUtilities button > svg {
+  width: 21px;
+  height: 21px;
+  flex: 0 0 21px;
+  stroke-width: 1.9;
+}
 .homeLaunch {
   min-height: 0;
   display: grid;
@@ -400,9 +350,31 @@ button { cursor: pointer; }
   background: rgb(255 255 255 / 10%);
   box-shadow: 0 0 0 clamp(28px, 4vw, 60px) rgb(255 255 255 / 5%);
 }
-.startVisual .productShape { width: 98px; height: 136px; background: #ffae44; }
+.startVisual::before {
+  position: absolute;
+  inset: 16%;
+  border: 1px solid rgb(255 255 255 / 16%);
+  border-radius: 50%;
+  content: '';
+}
+.heroPackageIcon {
+  width: 34%;
+  height: 34%;
+  translate: -22% -4%;
+  color: #fff;
+  fill: rgb(255 255 255 / 8%);
+  stroke-width: 1.35;
+}
+.heroScanIcon {
+  position: absolute;
+  right: 13%;
+  bottom: 15%;
+  width: 31%;
+  height: 31%;
+  color: #d9e9ff;
+  stroke-width: 1.5;
+}
 .startVisual .scanBeam { width: 190px; }
-.startVisual .barcode { top: 14%; right: 6%; }
 .startArrow {
   position: relative;
   z-index: 3;
@@ -416,6 +388,7 @@ button { cursor: pointer; }
   color: var(--blue);
   font-size: clamp(30px, 4vw, 48px);
 }
+.startArrow svg { width: 46%; height: 46%; stroke-width: 2; }
 .homeAssist {
   display: grid;
   grid-template-rows: repeat(2, 1fr);
@@ -445,6 +418,7 @@ button { cursor: pointer; }
   font-style: normal;
   font-weight: 700;
 }
+.homeAssist i svg { width: 27px; height: 27px; stroke-width: 1.9; }
 .homeAssist span { display: grid; gap: 4px; }
 .homeAssist b { font-size: clamp(17px, 1.5vw, 22px); }
 .homeAssist small { color: #708292; font-size: 11px; }
@@ -700,7 +674,8 @@ button { cursor: pointer; }
 }
 .choiceTiles button:active { translate: 0 2px; box-shadow: inset 0 -2px #094d9f; }
 .choiceTiles button.neutral { background: #e7edf2; color: #263a4d; box-shadow: inset 0 -4px #c2ced7; }
-.choiceTiles i { align-self: start; display: grid; width: clamp(62px, 6vw, 86px); aspect-ratio: 1; place-items: center; border-radius: 18px; background: #fff; color: var(--blue); font-size: clamp(20px, 2.3vw, 32px); font-style: normal; font-weight: 700; }
+.choiceTiles i { align-self: start; display: grid; width: clamp(62px, 6vw, 86px); aspect-ratio: 1; place-items: center; border-radius: 18px; background: #fff; color: var(--blue); font-style: normal; }
+.choiceTiles i svg { width: 52%; height: 52%; stroke-width: 1.75; }
 .choiceTiles .neutral i { color: #596b7a; }
 .choiceTiles b { align-self: end; font-size: clamp(23px, 2.5vw, 36px); line-height: 1.08; }
 .choiceTiles small { align-self: start; color: #dceaff; font-size: 12px; }
@@ -735,10 +710,17 @@ button { cursor: pointer; }
 .pointScanPanel h1 { max-width: 760px; margin: 6px 0 0; color: var(--navy); font-size: clamp(36px, 5vw, 62px); line-height: 1.14; }
 .pointScanPanel p { max-width: 640px; margin: 0; color: #5e7183; font-size: clamp(16px, 1.7vw, 21px); line-height: 1.7; }
 .pointScanPanel > strong { margin-top: 14px; color: var(--blue); font-weight: 600; }
-.pointReader { position: relative; width: 134px; height: 92px; margin-bottom: 12px; border: 3px solid var(--blue); border-radius: 18px; background: #eef5ff; }
-.pointReader::before { position: absolute; inset: 16px 24px; border: 3px solid var(--blue); border-radius: 50%; content: ''; }
-.pointReader i { position: absolute; top: 50%; left: 50%; width: 42px; height: 3px; background: var(--blue); translate: -50% -50%; }
-.pointReader i:last-child { rotate: 90deg; }
+.pointReader {
+  width: 118px;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  margin-bottom: 12px;
+  border-radius: 28px;
+  background: #e9f2ff;
+  color: var(--blue);
+}
+.pointReader svg { width: 58px; height: 58px; stroke-width: 1.7; }
 
 .completeCard {
   width: min(620px, 100%);
@@ -1013,7 +995,8 @@ button { cursor: pointer; }
   .brand { height: 68px; padding: 0 20px; }
   .brand > span, .brand > small { display: none; }
   .brand .soundButton { margin-right: 66px; margin-left: auto; }
-  .homeScreen { min-height: 100dvh; grid-template-columns: 1fr; grid-template-rows: auto auto; gap: 18px; padding: calc(var(--kiosk-header) + 22px) 22px 22px; }
+  .homeScreen { min-height: 100dvh; grid-template-columns: 1fr; grid-template-rows: auto auto; gap: 18px; padding: 84px 22px 22px; }
+  .homeUtilities { top: 18px; right: 22px; }
   .homeLaunch { grid-template-columns: 1fr; }
   .startButton { min-height: 430px; padding: 34px; border-radius: 22px; }
   .startVisual { right: 12%; width: 300px; }
@@ -1071,7 +1054,6 @@ button { cursor: pointer; }
   .choiceCard { padding: 22px 16px; border-radius: 0; }
   .choiceTiles[data-options='3'], .choiceTiles[data-options='4'] { grid-template-columns: 1fr; }
   .choiceTiles button { min-height: 112px; }
-  .kioskHeader { padding: 0 54px; }
   .homeUtilities { flex-wrap: wrap; justify-content: flex-end; }
   .homeUtilities button span { display: none; }
   .startButton { min-height: 340px; }
