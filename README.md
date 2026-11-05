@@ -2,6 +2,13 @@
 
 CIA MARTのイベント用セルフレジWebアプリです。iPad横向きの全画面利用を想定し、通常の商品読取画面と、隠し操作から開く購入履歴画面を同じ端末内で提供します。
 
+## 引き継ぎ・共通ルール
+
+- [2プロジェクト共通の引き継ぎガイド](https://github.com/07kim/CIAapp/blob/main/docs/HANDOFF_GUIDE.md)
+- [デザイン4原則・一般UI基準・再導入禁止事項](https://github.com/07kim/CIAapp/blob/main/docs/DESIGN_RULES_AND_PROHIBITIONS.md)
+
+実装時は上記に加え、このリポジトリの`AGENTS.md`と`docs/`配下の仕様書を読みます。ローカル仕様と共通資料が矛盾する場合は、勝手に解釈せず確認します。
+
 ## 主な機能
 
 - カメラによるEAN-13 / EAN-8バーコード読取
