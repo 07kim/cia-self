@@ -7,7 +7,7 @@ CIA MARTのイベント用セルフレジWebアプリです。iPad横向きの�
 - [2プロジェクト共通の引き継ぎガイド](https://github.com/07kim/CIAapp/blob/main/docs/HANDOFF_GUIDE.md)
 - [デザイン4原則・一般UI基準・再導入禁止事項](https://github.com/07kim/CIAapp/blob/main/docs/DESIGN_RULES_AND_PROHIBITIONS.md)
 
-実装時は上記に加え、このリポジトリの`AGENTS.md`と`docs/`配下の仕様書を読みます。ローカル仕様と共通資料が矛盾する場合は、勝手に解釈せず確認します。
+実装時は上記に加え、このリポジトリの`AGENTS.md`と`docs/`配下の仕様書を読みます。iPadの操作・アクセシビリティは[Apple Human Interface Guidelines](https://developer.apple.com/design/human-interface-guidelines/)を必須基準とします。ローカル仕様と共通資料が矛盾する場合は、勝手に解釈せず確認します。
 
 ## 主な機能
 

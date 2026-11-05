@@ -8,11 +8,13 @@
 - GitHubとVercelはCIAappから完全に分離する。
 - UIアイコンは`lucide-react`のSVGコンポーネントをアプリ本体へ同梱する。外部CDN、Webフォント、実行時のアイコン取得へ依存せず、CSSはサイズ・線幅・色だけを画面ごとに調整する。
 - `html / body / #root / .app`を端末表示領域へ固定し、ドキュメントスクロールを禁止する。可変件数を扱う`cartLines / table / detail / employeePanel`と狭幅時の選択肢だけが内部スクロールを所有する。
+- iPadでは`env(safe-area-inset-*)`をレイアウト余白へ反映し、重要な操作と情報を画面端やホームインジケータへ密着させない。44×44pt以上の主要操作領域は見た目のアイコン寸法ではなくヒット領域で保証する。
 
 ## バーコード読取
 
 - カメラ映像は`navigator.mediaDevices.getUserMedia()`から取得し、HTTPS上でのみ開始する。
 - ブラウザ標準の`BarcodeDetector`を優先し、非対応端末では同梱したZXing読取へ自動的に切り替える。通信先の外部CDNには依存しない。
+- カメラ権限要求は初期起動時に実行せず、商品読取状態へ入ったユーザー操作を起点にする。権限拒否、API非対応、デバイス未検出、ストリーム取得失敗を別状態として扱い、UIへ回復方法を渡す。
 - 初版の対応形式は`EAN-13 / EAN-8`とし、必要に応じて`Code 128 / QR`を設定で追加できる境界を保つ。
 - 読取状態は`idle / requesting-permission / scanning / matched / unregistered / unavailable`として明示する。
 - 同じコードの連続検知にはクールダウンを設ける。数量変更は買い物かごの操作で行い、カメラの連続フレームだけで意図せず増加させない。
