@@ -7,6 +7,8 @@ import {
   CircleHelp,
   CreditCard,
   Languages,
+  KeyRound,
+  ImageUp,
   Nfc,
   Package,
   QrCode,
@@ -26,8 +28,16 @@ import {
 } from './barcode-scanner'
 import { findProduct, products, type Product } from './catalog'
 import { searchTransactions, total, type Transaction } from './data'
+import {
+  loadPuzzleSettings,
+  MAX_PUZZLE_IMAGE_BYTES,
+  normalizePuzzlePassword,
+  resetPuzzleSettings,
+  savePuzzleSettings,
+  type PuzzleSettings,
+} from './puzzle-settings'
 
-type Screen = 'home' | 'points' | 'pointScan' | 'bag' | 'payment' | 'checkout' | 'settlement' | 'lock' | 'employee' | 'history'
+type Screen = 'home' | 'points' | 'pointScan' | 'bag' | 'payment' | 'checkout' | 'settlement' | 'lock' | 'employee' | 'employeeId' | 'puzzleSettings' | 'history'
 type Corner = 'tl' | 'tr' | 'br' | 'bl'
 type HomeDialog = 'guide' | 'staffConfirm' | 'staffCalled' | null
 type EmployeeView = 'menu' | 'catalog' | 'terminal' | 'settings'
@@ -75,6 +85,12 @@ export function App() {
   const [bagChoice, setBagChoice] = useState('未選択')
   const [paymentChoice, setPaymentChoice] = useState('未選択')
   const [employeeView, setEmployeeView] = useState<EmployeeView>('menu')
+  const [employeeId, setEmployeeId] = useState('')
+  const [employeeIdError, setEmployeeIdError] = useState('')
+  const [puzzleSettings, setPuzzleSettings] = useState<PuzzleSettings>(() => loadPuzzleSettings())
+  const [puzzleDraft, setPuzzleDraft] = useState<PuzzleSettings>(() => loadPuzzleSettings())
+  const [settingsMessage, setSettingsMessage] = useState('')
+  const [settingsError, setSettingsError] = useState('')
   const feedbackTimer = useRef<number>(0)
   const sequenceTimer = useRef<number>(0)
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -101,6 +117,10 @@ export function App() {
     setBagChoice('未選択')
     setPaymentChoice('未選択')
     setEmployeeView('menu')
+    setEmployeeId('')
+    setEmployeeIdError('')
+    setSettingsMessage('')
+    setSettingsError('')
     window.clearTimeout(sequenceTimer.current)
     sequenceRef.current = 0
     lastCornerInput.current = { corner: null, at: Number.NEGATIVE_INFINITY }
@@ -196,7 +216,7 @@ export function App() {
   }
 
   const authenticate = () => {
-    if (answer.normalize('NFKC').trim() === 'ばいてん') {
+    if (normalizePuzzlePassword(answer) === puzzleSettings.password) {
       play('granted')
       setScreen('employee')
       setAnswer('')
@@ -206,6 +226,72 @@ export function App() {
       setDenied(true)
       window.setTimeout(goHome, 1_200)
     }
+  }
+
+  const appendEmployeeId = (digit: string) => {
+    play('tap')
+    setEmployeeIdError('')
+    setEmployeeId((current) => current.length < 12 ? `${current}${digit}` : current)
+  }
+
+  const verifyEmployeeId = () => {
+    if (employeeId === '20261107') {
+      play('granted')
+      setPuzzleDraft(puzzleSettings)
+      setSettingsMessage('')
+      setSettingsError('')
+      setScreen('puzzleSettings')
+      return
+    }
+    play('denied')
+    setEmployeeIdError('該当する従業員IDがありません')
+    setEmployeeId('')
+  }
+
+  const choosePuzzleImage = (file: File | undefined) => {
+    setSettingsMessage('')
+    setSettingsError('')
+    if (!file) return
+    if (!file.type.startsWith('image/')) {
+      setSettingsError('画像ファイルを選択してください。')
+      return
+    }
+    if (file.size > MAX_PUZZLE_IMAGE_BYTES) {
+      setSettingsError('画像は1.5MB以下にしてください。')
+      return
+    }
+    const reader = new FileReader()
+    reader.onload = () => setPuzzleDraft((current) => ({
+      ...current,
+      imageDataUrl: typeof reader.result === 'string' ? reader.result : null,
+      imageName: file.name,
+    }))
+    reader.onerror = () => setSettingsError('画像を読み込めませんでした。')
+    reader.readAsDataURL(file)
+  }
+
+  const commitPuzzleSettings = () => {
+    setSettingsMessage('')
+    setSettingsError('')
+    try {
+      const saved = savePuzzleSettings(puzzleDraft)
+      setPuzzleSettings(saved)
+      setPuzzleDraft(saved)
+      setSettingsMessage('謎設定をこの端末に保存しました')
+      play('granted')
+    } catch (error) {
+      setSettingsError(error instanceof Error ? error.message : '設定を保存できませんでした。')
+      play('denied')
+    }
+  }
+
+  const restorePuzzleSettings = () => {
+    const restored = resetPuzzleSettings()
+    setPuzzleSettings(restored)
+    setPuzzleDraft(restored)
+    setSettingsError('')
+    setSettingsMessage('初期設定に戻しました')
+    play('tap')
   }
 
   const updateQty = (barcode: string, delta: number) => {
@@ -492,7 +578,9 @@ export function App() {
         <section className="lock">
           <div className="lockcard">
             <span>管理機能認証</span>
-            <div className="puzzle">謎画像をここへ差し替え</div>
+            <div className={`puzzle${puzzleSettings.imageDataUrl ? ' hasImage' : ''}`}>
+              {puzzleSettings.imageDataUrl ? <img alt="設定された謎画像" src={puzzleSettings.imageDataUrl} /> : '謎画像は未設定です'}
+            </div>
             <h1>システムパスワード</h1>
             <input aria-label="システムパスワード" autoFocus onChange={(event) => setAnswer(event.target.value)} placeholder="回答を入力" value={answer} />
             <button disabled={!answer.trim()} onClick={authenticate}>認証</button>
@@ -513,6 +601,7 @@ export function App() {
               <button onClick={() => setEmployeeView('catalog')} type="button"><i>品</i><b>商品台帳</b><small>価格・商品コード</small></button>
               <button onClick={() => setEmployeeView('terminal')} type="button"><i>端</i><b>端末状態</b><small>カメラ・通信・音声</small></button>
               <button onClick={() => setEmployeeView('settings')} type="button"><i>設</i><b>取引設定</b><small>会計フロー・税率</small></button>
+              <button onClick={() => { setEmployeeId(''); setEmployeeIdError(''); setScreen('employeeId') }} type="button"><i><KeyRound aria-hidden="true" /></i><b>従業員ID認証</b><small>管理用謎設定</small></button>
             </div>
           ) : (
             <div className="employeePanel">
@@ -528,6 +617,48 @@ export function App() {
               ) : null}
             </div>
           )}
+        </section>
+      ) : null}
+
+      {screen === 'employeeId' ? (
+        <section className="employeeUtility">
+          <header><div><span>CIA MART / STAFF CONSOLE</span><h1>従業員ID認証</h1></div><button onClick={() => setScreen('employee')} type="button">従業員メニュー</button></header>
+          <div className="idAuthLayout">
+            <div className="idAuthCopy"><span>EMPLOYEE VERIFICATION</span><h2>従業員IDを<br />入力してください</h2><p>管理設定へのアクセス権限を照会します。</p></div>
+            <div className="idKeypadPanel">
+              <output aria-label="従業員ID">{employeeId || '—'}</output>
+              {employeeIdError ? <p className="idError" role="alert">{employeeIdError}</p> : <p className="idHint">8〜12桁の数字</p>}
+              <div className="numberPad">
+                {['1','2','3','4','5','6','7','8','9'].map((digit) => <button key={digit} onClick={() => appendEmployeeId(digit)} type="button">{digit}</button>)}
+                <button className="keyAction" onClick={() => { setEmployeeId(''); setEmployeeIdError('') }} type="button">クリア</button>
+                <button onClick={() => appendEmployeeId('0')} type="button">0</button>
+                <button aria-label="1文字削除" className="keyAction" onClick={() => { setEmployeeIdError(''); setEmployeeId((current) => current.slice(0, -1)) }} type="button">⌫</button>
+              </div>
+              <button className="verifyId" disabled={!employeeId} onClick={verifyEmployeeId} type="button">従業員IDを照会</button>
+            </div>
+          </div>
+        </section>
+      ) : null}
+
+      {screen === 'puzzleSettings' ? (
+        <section className="employeeUtility">
+          <header><div><span>CIA MART / STAFF CONSOLE</span><h1>謎設定</h1></div><button onClick={() => setScreen('employee')} type="button">従業員メニュー</button></header>
+          <div className="puzzleSettingsLayout">
+            <section className="puzzlePreview">
+              <span>PUZZLE PREVIEW</span><h2>認証画面プレビュー</h2>
+              <div className={`puzzle${puzzleDraft.imageDataUrl ? ' hasImage' : ''}`}>
+                {puzzleDraft.imageDataUrl ? <img alt="謎画像プレビュー" src={puzzleDraft.imageDataUrl} /> : <><ImageUp aria-hidden="true" /><b>謎画像は未設定です</b></>}
+              </div>
+            </section>
+            <section className="puzzleForm">
+              <div><label htmlFor="puzzle-password">正解パスワード</label><input id="puzzle-password" onChange={(event) => setPuzzleDraft((current) => ({ ...current, password: event.target.value }))} type="text" value={puzzleDraft.password} /></div>
+              <div><label htmlFor="puzzle-image">謎画像</label><label className="filePicker" htmlFor="puzzle-image"><ImageUp aria-hidden="true" /><span><b>画像を選択</b><small>PNG / JPEG / WebP・1.5MB以下</small></span></label><input accept="image/*" id="puzzle-image" onChange={(event) => choosePuzzleImage(event.target.files?.[0])} type="file" /><small className="fileName">{puzzleDraft.imageName || 'ファイル未選択'}</small></div>
+              {puzzleDraft.imageDataUrl ? <button className="removeImage" onClick={() => setPuzzleDraft((current) => ({ ...current, imageDataUrl: null, imageName: null }))} type="button">画像を削除</button> : null}
+              {settingsError ? <p className="settingsError" role="alert">{settingsError}</p> : null}
+              {settingsMessage ? <p className="settingsSuccess" role="status">{settingsMessage}</p> : null}
+              <div className="settingsActions"><button onClick={restorePuzzleSettings} type="button">初期設定に戻す</button><button className="saveSettings" onClick={commitPuzzleSettings} type="button">設定を保存</button></div>
+            </section>
+          </div>
         </section>
       ) : null}
 

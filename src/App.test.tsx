@@ -12,6 +12,7 @@ import { App } from './App'
 
 describe('self checkout', () => {
   beforeEach(() => {
+    window.localStorage.clear()
     startBarcodeScanner.mockImplementation(async (_video, onCode: (value: string) => void) => {
       onCode('2000000000091')
       return { stop: vi.fn() }
@@ -145,6 +146,43 @@ describe('self checkout', () => {
     expect(screen.getByRole('button', { name: /商品台帳/ })).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: /購入履歴/ }))
     expect(screen.getByRole('heading', { name: '購入履歴' })).toBeInTheDocument()
+  })
+
+  it('allows only the configured employee ID to open puzzle settings', () => {
+    render(<App />)
+    for (const corner of ['tl', 'tr', 'bl', 'br']) fireEvent.pointerDown(screen.getByRole('button', { name: `hidden-${corner}` }))
+    fireEvent.change(screen.getByRole('textbox', { name: 'システムパスワード' }), { target: { value: 'ばいてん' } })
+    fireEvent.click(screen.getByRole('button', { name: '認証' }))
+    fireEvent.click(screen.getByRole('button', { name: /従業員ID認証/ }))
+
+    fireEvent.click(screen.getByRole('button', { name: '1' }))
+    fireEvent.click(screen.getByRole('button', { name: '従業員IDを照会' }))
+    expect(screen.getByRole('alert')).toHaveTextContent('該当する従業員IDがありません')
+    expect(screen.queryByRole('heading', { name: '謎設定' })).not.toBeInTheDocument()
+
+    for (const digit of '20261107') fireEvent.click(screen.getByRole('button', { name: digit }))
+    fireEvent.click(screen.getByRole('button', { name: '従業員IDを照会' }))
+    expect(screen.getByRole('heading', { name: '謎設定' })).toBeInTheDocument()
+  })
+
+  it('uses a saved puzzle password for subsequent management authentication', () => {
+    render(<App />)
+    for (const corner of ['tl', 'tr', 'bl', 'br']) fireEvent.pointerDown(screen.getByRole('button', { name: `hidden-${corner}` }))
+    fireEvent.change(screen.getByRole('textbox', { name: 'システムパスワード' }), { target: { value: 'ばいてん' } })
+    fireEvent.click(screen.getByRole('button', { name: '認証' }))
+    fireEvent.click(screen.getByRole('button', { name: /従業員ID認証/ }))
+    for (const digit of '20261107') fireEvent.click(screen.getByRole('button', { name: digit }))
+    fireEvent.click(screen.getByRole('button', { name: '従業員IDを照会' }))
+    fireEvent.change(screen.getByRole('textbox', { name: '正解パスワード' }), { target: { value: 'あたらしいこたえ' } })
+    fireEvent.click(screen.getByRole('button', { name: '設定を保存' }))
+    expect(screen.getByRole('status')).toHaveTextContent('保存しました')
+
+    fireEvent.click(screen.getByRole('button', { name: '従業員メニュー' }))
+    fireEvent.click(screen.getByRole('button', { name: 'セルフレジへ戻る' }))
+    for (const corner of ['tl', 'tr', 'bl', 'br']) fireEvent.pointerDown(screen.getByRole('button', { name: `hidden-${corner}` }))
+    fireEvent.change(screen.getByRole('textbox', { name: 'システムパスワード' }), { target: { value: 'あたらしいこたえ' } })
+    fireEvent.click(screen.getByRole('button', { name: '認証' }))
+    expect(screen.getByRole('heading', { name: '従業員モード' })).toBeInTheDocument()
   })
 
   it('allows up to 1.5 seconds between each Z touch', () => {
