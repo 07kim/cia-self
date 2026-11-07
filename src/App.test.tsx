@@ -9,6 +9,7 @@ vi.mock('./barcode-scanner', () => ({
 }))
 
 import { App } from './App'
+import { PUZZLE_SETTINGS_STORAGE_KEY } from './puzzle-settings'
 
 describe('self checkout', () => {
   beforeEach(() => {
@@ -146,6 +147,23 @@ describe('self checkout', () => {
     expect(screen.getByRole('button', { name: /商品台帳/ })).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: /購入履歴/ }))
     expect(screen.getByRole('heading', { name: '購入履歴' })).toBeInTheDocument()
+  })
+
+  it('shows an uploaded puzzle image in a dedicated large image region', () => {
+    window.localStorage.setItem(PUZZLE_SETTINGS_STORAGE_KEY, JSON.stringify({
+      password: 'ばいてん',
+      imageDataUrl: 'data:image/png;base64,cHV6emxl',
+      imageName: 'puzzle.png',
+    }))
+    render(<App />)
+
+    for (const corner of ['tl', 'tr', 'bl', 'br']) {
+      fireEvent.pointerDown(screen.getByRole('button', { name: `hidden-${corner}` }))
+    }
+
+    const image = screen.getByRole('img', { name: '設定された謎画像' })
+    expect(image.closest('.puzzle')).toHaveClass('hasImage')
+    expect(screen.getByRole('heading', { name: 'システムパスワード' }).closest('.lockAuth')).not.toBeNull()
   })
 
   it('allows only the configured employee ID to open puzzle settings', () => {

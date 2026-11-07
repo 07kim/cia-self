@@ -577,14 +577,16 @@ export function App() {
       {screen === 'lock' ? (
         <section className="lock">
           <div className="lockcard">
-            <span>管理機能認証</span>
             <div className={`puzzle${puzzleSettings.imageDataUrl ? ' hasImage' : ''}`}>
               {puzzleSettings.imageDataUrl ? <img alt="設定された謎画像" src={puzzleSettings.imageDataUrl} /> : '謎画像は未設定です'}
             </div>
-            <h1>システムパスワード</h1>
-            <input aria-label="システムパスワード" autoFocus onChange={(event) => setAnswer(event.target.value)} placeholder="回答を入力" value={answer} />
-            <button disabled={!answer.trim()} onClick={authenticate}>認証</button>
-            {denied ? <p className="error">認証に失敗しました</p> : null}
+            <div className="lockAuth">
+              <span>管理機能認証</span>
+              <h1>システムパスワード</h1>
+              <input aria-label="システムパスワード" autoFocus onChange={(event) => setAnswer(event.target.value)} placeholder="回答を入力" value={answer} />
+              <button disabled={!answer.trim()} onClick={authenticate}>認証</button>
+              {denied ? <p className="error">認証に失敗しました</p> : null}
+            </div>
           </div>
         </section>
       ) : null}
