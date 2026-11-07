@@ -205,27 +205,36 @@ describe('self checkout', () => {
     expect(screen.getByRole('heading', { name: '従業員モード' })).toBeInTheDocument()
   })
 
-  it('allows up to 1.5 seconds between each Z touch', () => {
+  it('returns from management authentication to the home screen', () => {
+    render(<App />)
+    for (const corner of ['tl', 'tr', 'bl', 'br']) fireEvent.pointerDown(screen.getByRole('button', { name: `hidden-${corner}` }))
+    fireEvent.change(screen.getByRole('textbox', { name: 'システムパスワード' }), { target: { value: 'レシート' } })
+    fireEvent.click(screen.getByRole('button', { name: '戻る' }))
+    expect(screen.getByRole('heading', { name: 'CIA MART 会計端末' })).toBeInTheDocument()
+    expect(screen.queryByRole('textbox', { name: 'システムパスワード' })).not.toBeInTheDocument()
+  })
+
+  it('allows up to 2.5 seconds between each Z touch', () => {
     vi.useFakeTimers()
     render(<App />)
 
     fireEvent.pointerDown(screen.getByRole('button', { name: 'hidden-tl' }))
-    act(() => vi.advanceTimersByTime(1_400))
+    act(() => vi.advanceTimersByTime(2_400))
     fireEvent.pointerDown(screen.getByRole('button', { name: 'hidden-tr' }))
-    act(() => vi.advanceTimersByTime(1_400))
+    act(() => vi.advanceTimersByTime(2_400))
     fireEvent.pointerDown(screen.getByRole('button', { name: 'hidden-bl' }))
-    act(() => vi.advanceTimersByTime(1_400))
+    act(() => vi.advanceTimersByTime(2_400))
     fireEvent.pointerDown(screen.getByRole('button', { name: 'hidden-br' }))
     expect(screen.getByRole('heading', { name: 'システムパスワード' })).toBeInTheDocument()
     vi.useRealTimers()
   })
 
-  it('resets the Z touch sequence when one interval exceeds 1.5 seconds', () => {
+  it('resets the Z touch sequence when one interval exceeds 2.5 seconds', () => {
     vi.useFakeTimers()
     render(<App />)
 
     fireEvent.pointerDown(screen.getByRole('button', { name: 'hidden-tl' }))
-    act(() => vi.advanceTimersByTime(1_501))
+    act(() => vi.advanceTimersByTime(2_501))
     for (const corner of ['tr', 'bl', 'br']) {
       fireEvent.pointerDown(screen.getByRole('button', { name: `hidden-${corner}` }))
     }

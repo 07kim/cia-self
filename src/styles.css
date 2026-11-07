@@ -282,9 +282,9 @@ button { cursor: pointer; }
 .homeHeader .compactBrand { margin: 0; }
 .homeUtilities {
   position: absolute;
-  z-index: 5;
+  z-index: 50;
   top: 20px;
-  right: clamp(28px, 5vw, 72px);
+  right: max(104px, env(safe-area-inset-right));
   display: flex;
   gap: 8px;
 }
@@ -810,8 +810,8 @@ button { cursor: pointer; }
 .corner {
   position: fixed;
   z-index: 45;
-  width: 52px;
-  height: 52px;
+  width: 88px;
+  height: 88px;
   padding: 0;
   border: 0;
   outline: 0;
@@ -910,6 +910,8 @@ button { cursor: pointer; }
 .lockAuth input { min-width: 0; padding: 18px; border: 2px solid #c1ced9; border-radius: 10px; font-size: 20px; }
 .lockAuth button { min-height: 54px; padding: 17px; border: 0; border-radius: 10px; background: var(--blue); color: #fff; font-weight: 700; }
 .lockAuth button:disabled { opacity: .45; }
+.lockActions { display: grid; grid-template-columns: minmax(96px, .7fr) minmax(140px, 1.3fr); gap: 10px; }
+.lockActions .lockBack { border: 1px solid #bdcad5; background: #fff; color: #405367; }
 .error { margin: 0; color: var(--red); font-weight: 700; }
 
 .employeeMode { min-height: 100dvh; background: #eef2f5; }
@@ -1082,7 +1084,7 @@ button { cursor: pointer; }
   .brand > span, .brand > small { display: none; }
   .brand .soundButton { margin-right: 66px; margin-left: auto; }
   .homeScreen { min-height: 100dvh; grid-template-columns: 1fr; grid-template-rows: auto auto; gap: 18px; padding: 84px 22px 22px; }
-  .homeUtilities { top: 18px; right: 22px; }
+  .homeUtilities { top: 18px; right: max(104px, env(safe-area-inset-right)); }
   .homeLaunch { grid-template-columns: 1fr; }
   .startButton { min-height: 430px; padding: 34px; border-radius: 22px; }
   .startVisual { right: 12%; width: 300px; }

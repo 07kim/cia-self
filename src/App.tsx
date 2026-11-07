@@ -46,7 +46,7 @@ type Feedback = { tone: 'success' | 'error'; title: string; detail: string } | n
 type Locale = 'ja' | 'en'
 
 const corners: Corner[] = ['tl', 'tr', 'bl', 'br']
-const Z_SEQUENCE_LIMIT_MS = 1_500
+const Z_SEQUENCE_LIMIT_MS = 2_500
 
 function KioskProgress({ current, locale }: { current: 'points' | 'bag' | 'payment' | 'checkout' | 'settlement'; locale: Locale }) {
   const steps = [
@@ -585,7 +585,10 @@ export function App() {
               <h1>システムパスワード</h1>
               <p className="answerGuide" id="answer-guide">カタカナで入力してください</p>
               <input aria-describedby="answer-guide" aria-label="システムパスワード" autoFocus onChange={(event) => setAnswer(event.target.value)} placeholder="カタカナで入力してください" value={answer} />
-              <button disabled={!answer.trim()} onClick={authenticate}>認証</button>
+              <div className="lockActions">
+                <button className="lockBack" onClick={goHome} type="button">戻る</button>
+                <button disabled={!answer.trim()} onClick={authenticate} type="button">認証</button>
+              </div>
               {denied ? <p className="error">認証に失敗しました</p> : null}
             </div>
           </div>
