@@ -583,7 +583,8 @@ export function App() {
             <div className="lockAuth">
               <span>管理機能認証</span>
               <h1>システムパスワード</h1>
-              <input aria-label="システムパスワード" autoFocus onChange={(event) => setAnswer(event.target.value)} placeholder="回答を入力" value={answer} />
+              <p className="answerGuide" id="answer-guide">カタカナで入力してください</p>
+              <input aria-describedby="answer-guide" aria-label="システムパスワード" autoFocus onChange={(event) => setAnswer(event.target.value)} placeholder="カタカナで入力してください" value={answer} />
               <button disabled={!answer.trim()} onClick={authenticate}>認証</button>
               {denied ? <p className="error">認証に失敗しました</p> : null}
             </div>

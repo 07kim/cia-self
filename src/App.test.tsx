@@ -140,7 +140,8 @@ describe('self checkout', () => {
     for (const corner of ['tl', 'tr', 'bl', 'br']) {
       fireEvent.pointerDown(screen.getByRole('button', { name: `hidden-${corner}` }))
     }
-    fireEvent.change(screen.getByRole('textbox', { name: 'システムパスワード' }), { target: { value: 'ばいてん' } })
+    expect(screen.getByText('カタカナで入力してください')).toBeInTheDocument()
+    fireEvent.change(screen.getByRole('textbox', { name: 'システムパスワード' }), { target: { value: 'レシート' } })
     fireEvent.click(screen.getByRole('button', { name: '認証' }))
 
     expect(screen.getByRole('heading', { name: '従業員モード' })).toBeInTheDocument()
@@ -170,7 +171,7 @@ describe('self checkout', () => {
   it('allows only the configured employee ID to open puzzle settings', () => {
     render(<App />)
     for (const corner of ['tl', 'tr', 'bl', 'br']) fireEvent.pointerDown(screen.getByRole('button', { name: `hidden-${corner}` }))
-    fireEvent.change(screen.getByRole('textbox', { name: 'システムパスワード' }), { target: { value: 'ばいてん' } })
+    fireEvent.change(screen.getByRole('textbox', { name: 'システムパスワード' }), { target: { value: 'レシート' } })
     fireEvent.click(screen.getByRole('button', { name: '認証' }))
     fireEvent.click(screen.getByRole('button', { name: /従業員ID認証/ }))
 
@@ -187,7 +188,7 @@ describe('self checkout', () => {
   it('uses a saved puzzle password for subsequent management authentication', () => {
     render(<App />)
     for (const corner of ['tl', 'tr', 'bl', 'br']) fireEvent.pointerDown(screen.getByRole('button', { name: `hidden-${corner}` }))
-    fireEvent.change(screen.getByRole('textbox', { name: 'システムパスワード' }), { target: { value: 'ばいてん' } })
+    fireEvent.change(screen.getByRole('textbox', { name: 'システムパスワード' }), { target: { value: 'レシート' } })
     fireEvent.click(screen.getByRole('button', { name: '認証' }))
     fireEvent.click(screen.getByRole('button', { name: /従業員ID認証/ }))
     for (const digit of '20261107') fireEvent.click(screen.getByRole('button', { name: digit }))

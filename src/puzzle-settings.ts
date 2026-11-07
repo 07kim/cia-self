@@ -1,3 +1,5 @@
+import defaultPuzzleImageUrl from './assets/default-puzzle-shopping.png'
+
 export type PuzzleSettings = {
   password: string
   imageDataUrl: string | null
@@ -5,9 +7,9 @@ export type PuzzleSettings = {
 }
 
 export const DEFAULT_PUZZLE_SETTINGS: PuzzleSettings = {
-  password: 'ばいてん',
-  imageDataUrl: null,
-  imageName: null,
+  password: 'レシート',
+  imageDataUrl: defaultPuzzleImageUrl,
+  imageName: '購買.png',
 }
 
 export const PUZZLE_SETTINGS_STORAGE_KEY = 'cia-self:puzzle-settings:v1'
@@ -26,7 +28,7 @@ export function loadPuzzleSettings(storage: Pick<Storage, 'getItem'> | null = ge
     const password = typeof parsed.password === 'string' ? normalizePuzzlePassword(parsed.password) : ''
     return {
       password: password || DEFAULT_PUZZLE_SETTINGS.password,
-      imageDataUrl: typeof parsed.imageDataUrl === 'string' && parsed.imageDataUrl.startsWith('data:image/') ? parsed.imageDataUrl : null,
+      imageDataUrl: typeof parsed.imageDataUrl === 'string' && (parsed.imageDataUrl.startsWith('data:image/') || parsed.imageDataUrl === DEFAULT_PUZZLE_SETTINGS.imageDataUrl) ? parsed.imageDataUrl : null,
       imageName: typeof parsed.imageName === 'string' ? parsed.imageName : null,
     }
   } catch {

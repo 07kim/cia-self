@@ -906,6 +906,7 @@ button { cursor: pointer; }
   box-shadow: 0 14px 34px #20384f20;
 }
 .lockAuth h1 { margin: 6px 0 0; }
+.lockAuth .answerGuide { margin: -6px 0 2px; color: #607385; font-size: 14px; }
 .lockAuth input { min-width: 0; padding: 18px; border: 2px solid #c1ced9; border-radius: 10px; font-size: 20px; }
 .lockAuth button { min-height: 54px; padding: 17px; border: 0; border-radius: 10px; background: var(--blue); color: #fff; font-weight: 700; }
 .lockAuth button:disabled { opacity: .45; }
