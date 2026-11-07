@@ -141,7 +141,10 @@ describe('self checkout', () => {
       fireEvent.pointerDown(screen.getByRole('button', { name: `hidden-${corner}` }))
     }
     expect(screen.getByText('カタカナで入力してください')).toBeInTheDocument()
-    fireEvent.change(screen.getByRole('textbox', { name: 'システムパスワード' }), { target: { value: 'レシート' } })
+    const passwordInput = screen.getByRole('textbox', { name: 'システムパスワード' })
+    expect(passwordInput).not.toHaveAttribute('placeholder')
+    expect(passwordInput).not.toHaveFocus()
+    fireEvent.change(passwordInput, { target: { value: 'レシート' } })
     fireEvent.click(screen.getByRole('button', { name: '認証' }))
 
     expect(screen.getByRole('heading', { name: '従業員モード' })).toBeInTheDocument()
