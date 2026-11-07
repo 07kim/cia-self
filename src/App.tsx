@@ -577,7 +577,7 @@ export function App() {
       {screen === 'lock' ? (
         <section className="lock">
           <div className="lockcard">
-            <div className={`puzzle${puzzleSettings.imageDataUrl ? ' hasImage' : ''}`}>
+            <div className={`puzzle a4Puzzle${puzzleSettings.imageDataUrl ? ' hasImage' : ''}`}>
               {puzzleSettings.imageDataUrl ? <img alt="設定された謎画像" src={puzzleSettings.imageDataUrl} /> : '謎画像は未設定です'}
             </div>
             <div className="lockAuth">
@@ -648,7 +648,7 @@ export function App() {
           <div className="puzzleSettingsLayout">
             <section className="puzzlePreview">
               <span>PUZZLE PREVIEW</span><h2>認証画面プレビュー</h2>
-              <div className={`puzzle${puzzleDraft.imageDataUrl ? ' hasImage' : ''}`}>
+              <div className={`puzzle a4Puzzle${puzzleDraft.imageDataUrl ? ' hasImage' : ''}`}>
                 {puzzleDraft.imageDataUrl ? <img alt="謎画像プレビュー" src={puzzleDraft.imageDataUrl} /> : <><ImageUp aria-hidden="true" /><b>謎画像は未設定です</b></>}
               </div>
             </section>

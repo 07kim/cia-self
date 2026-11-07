@@ -163,6 +163,7 @@ describe('self checkout', () => {
 
     const image = screen.getByRole('img', { name: '設定された謎画像' })
     expect(image.closest('.puzzle')).toHaveClass('hasImage')
+    expect(image.closest('.puzzle')).toHaveClass('a4Puzzle')
     expect(screen.getByRole('heading', { name: 'システムパスワード' }).closest('.lockAuth')).not.toBeNull()
   })
 

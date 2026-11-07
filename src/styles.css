@@ -885,13 +885,26 @@ button { cursor: pointer; }
 .largeText .checkoutGrid { font-size: 1.08em; }
 
 .lock { height: 100dvh; min-height: 0; display: grid; place-items: center; overflow: hidden; padding: max(24px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left)); background: #edf2f6; }
-.lockcard { width: min(1180px, 100%); height: min(720px, calc(100dvh - 48px)); min-height: 520px; display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(300px, .7fr); gap: clamp(24px, 4vw, 56px); padding: clamp(22px, 3vw, 36px); border: 1px solid var(--line); border-radius: 22px; background: #fff; box-shadow: 0 24px 70px #20384f26; }
+.lockcard { width: min(1180px, 100%); height: min(720px, calc(100dvh - 48px)); min-height: 520px; display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(300px, .7fr); gap: clamp(24px, 4vw, 56px); padding: clamp(22px, 3vw, 36px); border: 1px solid var(--line); border-radius: 22px; background: #fff; box-shadow: 0 24px 70px #20384f26; }
 .lockAuth { min-width: 0; display: grid; align-content: center; gap: 16px; }
 .lockAuth > span { color: var(--blue); font-weight: 700; }
 .puzzle { height: 190px; display: grid; place-items: center; border: 2px dashed #b8c6d2; border-radius: 14px; background: var(--soft); color: #8293a2; }
 .puzzle.hasImage { overflow: hidden; border-style: solid; background: #eef2f5; }
-.puzzle img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.puzzle img { display: block; width: 100%; height: 100%; object-fit: contain; object-position: center; }
 .lockcard > .puzzle { width: 100%; height: 100%; min-height: 0; }
+.lockcard > .a4Puzzle.hasImage {
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  aspect-ratio: 297 / 210;
+  align-self: center;
+  justify-self: center;
+  border-color: #d7dee5;
+  border-radius: 3px;
+  background: #fff;
+  box-shadow: 0 14px 34px #20384f20;
+}
 .lockAuth h1 { margin: 6px 0 0; }
 .lockAuth input { min-width: 0; padding: 18px; border: 2px solid #c1ced9; border-radius: 10px; font-size: 20px; }
 .lockAuth button { min-height: 54px; padding: 17px; border: 0; border-radius: 10px; background: var(--blue); color: #fff; font-weight: 700; }
@@ -970,6 +983,7 @@ button { cursor: pointer; }
 .puzzleSettingsLayout { width: min(1180px, calc(100% - 48px)); min-height: 0; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(360px, .9fr); gap: clamp(24px, 4vw, 56px); align-items: center; margin: 0 auto; padding: 28px 0; }
 .puzzlePreview h2 { margin: 8px 0 20px; font-size: clamp(28px, 3vw, 42px); }
 .puzzlePreview .puzzle { height: min(48vh, 430px); }
+.puzzlePreview .a4Puzzle.hasImage { width: 100%; height: auto; max-width: 100%; max-height: min(48vh, 430px); aspect-ratio: 297 / 210; margin-inline: auto; border-radius: 3px; background: #fff; box-shadow: 0 12px 30px #20384f1c; }
 .puzzlePreview .puzzle:not(.hasImage) { grid-auto-flow: row; align-content: center; gap: 14px; }
 .puzzlePreview .puzzle svg { width: 48px; height: 48px; }
 .puzzleForm { display: grid; gap: 20px; padding: 28px; border: 1px solid #cbd6df; border-radius: 18px; background: #fff; }
@@ -1093,6 +1107,7 @@ button { cursor: pointer; }
   .lock { overflow: auto; align-items: start; }
   .lockcard { height: auto; min-height: calc(100dvh - 48px); grid-template-columns: 1fr; grid-template-rows: minmax(320px, 48vh) auto; }
   .lockcard > .puzzle { min-height: 320px; }
+  .lockcard > .a4Puzzle.hasImage { width: 100%; height: auto; min-height: 0; align-self: center; }
   .puzzleSettingsLayout { grid-template-columns: 1fr; align-content: start; overflow: auto; }
   .puzzlePreview .puzzle { height: 300px; }
   .thead, .table > button { grid-template-columns: 58px 1fr 85px 75px; }
@@ -1142,6 +1157,7 @@ button { cursor: pointer; }
   .lock { padding: 12px; }
   .lockcard { min-height: calc(100dvh - 24px); grid-template-rows: minmax(240px, 42vh) auto; gap: 18px; padding: 16px; border-radius: 16px; }
   .lockcard > .puzzle { min-height: 240px; }
+  .lockcard > .a4Puzzle.hasImage { width: 100%; height: auto; min-height: 0; align-self: center; }
   .idKeypadPanel, .puzzleForm { padding: 16px; }
   .numberPad button { min-height: 58px; }
   .puzzleSettingsLayout { width: calc(100% - 24px); }
