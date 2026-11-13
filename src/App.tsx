@@ -46,7 +46,7 @@ type Feedback = { tone: 'success' | 'error'; title: string; detail: string } | n
 type Locale = 'ja' | 'en'
 
 const corners: Corner[] = ['tl', 'tr', 'bl', 'br']
-const Z_SEQUENCE_LIMIT_MS = 2_500
+const Z_SEQUENCE_LIMIT_MS = 6_000
 
 function KioskProgress({ current, locale }: { current: 'points' | 'bag' | 'payment' | 'checkout' | 'settlement'; locale: Locale }) {
   const steps = [
