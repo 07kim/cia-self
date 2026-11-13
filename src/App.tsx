@@ -317,11 +317,14 @@ export function App() {
     setScreen('payment')
   }
 
-  const requestStaff = () => setDialog('staffConfirm')
-  const callStaff = () => {
-    play('tap')
-    setDialog('staffCalled')
-  }
+const requestStaff = () => setDialog('staffConfirm')
+const callStaff = () => {
+  const audio = new Audio('/staff-call.mp3')
+  audio.volume = 1.0
+  void audio.play().catch(console.error)
+  setDialog('staffCalled')
+}
+
 
   const choosePayment = (choice: string) => {
     play('tap')
