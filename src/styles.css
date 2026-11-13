@@ -810,8 +810,8 @@ button { cursor: pointer; }
 .corner {
   position: fixed;
   z-index: 45;
-  width: 120px;
-  height: 120px;
+  width: 180px;
+  height: 180px;
   padding: 0;
   border: 0;
   outline: 0;
