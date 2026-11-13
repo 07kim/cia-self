@@ -271,7 +271,7 @@ button { cursor: pointer; }
   grid-template-columns: 1fr;
   grid-template-rows: auto minmax(0, 1fr) auto;
   gap: clamp(18px, 2.6vh, 30px);
-  padding: clamp(84px, 9vh, 106px) clamp(28px, 5vw, 72px) clamp(20px, 3vw, 36px);
+  padding: clamp(104px, 11vh, 126px) clamp(28px, 5vw, 72px) clamp(20px, 3vw, 36px);
 }
 .homeHeader {
   display: flex;
