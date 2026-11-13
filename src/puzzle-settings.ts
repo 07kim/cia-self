@@ -7,7 +7,7 @@ export type PuzzleSettings = {
 }
 
 export const DEFAULT_PUZZLE_SETTINGS: PuzzleSettings = {
-  password: 'レシート',
+  password: 'セルフレジ',
   imageDataUrl: defaultPuzzleImageUrl,
   imageName: '購買.png',
 }
