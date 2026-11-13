@@ -689,6 +689,8 @@ button { cursor: pointer; }
   border: 1px solid #cbd6df;
   border-radius: 14px;
   background: #fff;
+  position: relative;
+  z-index: 46;
 }
 .choiceFooter > button { border: 0; background: #fff; color: var(--blue-dark); font-weight: 700; }
 .choiceFooter > div { display: flex; align-items: center; justify-content: center; gap: 12px; min-height: 58px; border-right: 1px solid #dbe3e9; border-left: 1px solid #dbe3e9; }
