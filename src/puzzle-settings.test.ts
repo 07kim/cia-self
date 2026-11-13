@@ -22,7 +22,7 @@ describe('puzzle settings', () => {
   it('uses the current puzzle defaults when no setting exists', () => {
     const storage = memoryStorage()
     expect(loadPuzzleSettings(storage)).toEqual(DEFAULT_PUZZLE_SETTINGS)
-    expect(DEFAULT_PUZZLE_SETTINGS.password).toBe('レシート')
+    expect(DEFAULT_PUZZLE_SETTINGS.password).toBe('セルフレジ')
     expect(DEFAULT_PUZZLE_SETTINGS.imageName).toBe('購買.png')
     expect(DEFAULT_PUZZLE_SETTINGS.imageDataUrl).toMatch(/default-puzzle-shopping\.png/)
   })
