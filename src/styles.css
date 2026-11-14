@@ -514,7 +514,8 @@ button { cursor: pointer; }
 }
 .cameraState b { font-size: 20px; }
 .cameraState span { color: #cbd7e2; }
-.cameraState button { margin-top: 10px; padding: 12px 20px; border: 0; border-radius: 10px; background: var(--blue); color: #fff; font-weight: 700; }
+.cameraState button { min-height: 44px; margin-top: 10px; padding: 12px 20px; border: 0; border-radius: 10px; background: var(--blue); color: #fff; font-weight: 700; }
+.cameraState .cameraBack { min-width: 116px; margin-top: 4px; border: 1px solid #cbd7e2; background: transparent; color: #fff; }
 .cameraStatus {
   position: absolute;
   z-index: 4;

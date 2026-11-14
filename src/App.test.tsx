@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, within } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const startBarcodeScanner = vi.fn()
@@ -13,6 +13,7 @@ import { PUZZLE_SETTINGS_STORAGE_KEY } from './puzzle-settings'
 
 describe('self checkout', () => {
   beforeEach(() => {
+    startBarcodeScanner.mockClear()
     window.localStorage.clear()
     startBarcodeScanner.mockImplementation(async (_video, onCode: (value: string) => void) => {
       onCode('2000000000091')
@@ -84,6 +85,45 @@ describe('self checkout', () => {
     fireEvent.click(screen.getByRole('button', { name: /クレジット/ }))
     expect(await screen.findByText('レジ袋 小')).toBeVisible()
     expect(screen.queryByText('商品選択')).not.toBeInTheDocument()
+  })
+
+  it('returns to payment even while camera permission is pending and stops a late session', async () => {
+    const stop = vi.fn()
+    let resolveStart: ((session: { stop: () => void }) => void) | undefined
+    startBarcodeScanner.mockImplementationOnce(() => new Promise((resolve) => {
+      resolveStart = resolve
+    }))
+    render(<App />)
+    fireEvent.click(screen.getByRole('button', { name: 'お会計を始める' }))
+    fireEvent.click(screen.getByRole('button', { name: /利用しない/ }))
+    fireEvent.click(screen.getByRole('button', { name: /不要/ }))
+    fireEvent.click(screen.getByRole('button', { name: /クレジット/ }))
+
+    await waitFor(() => expect(startBarcodeScanner).toHaveBeenCalledTimes(1))
+    const signal = startBarcodeScanner.mock.calls[0][2] as AbortSignal
+    expect(signal.aborted).toBe(false)
+    const cameraOverlay = document.querySelector('.cameraState') as HTMLElement
+    fireEvent.click(within(cameraOverlay).getByRole('button', { name: '戻る' }))
+
+    expect(signal.aborted).toBe(true)
+    expect(screen.getByRole('button', { name: /クレジット/ })).toBeVisible()
+    await act(async () => { resolveStart?.({ stop }) })
+    expect(stop).toHaveBeenCalledTimes(1)
+    expect(screen.getByRole('button', { name: /クレジット/ })).toBeVisible()
+  })
+
+  it('offers a back action if camera startup fails', async () => {
+    startBarcodeScanner.mockRejectedValueOnce(new DOMException('Camera not found', 'NotFoundError'))
+    render(<App />)
+    fireEvent.click(screen.getByRole('button', { name: 'お会計を始める' }))
+    fireEvent.click(screen.getByRole('button', { name: /利用しない/ }))
+    fireEvent.click(screen.getByRole('button', { name: /不要/ }))
+    fireEvent.click(screen.getByRole('button', { name: /現金/ }))
+
+    expect(await screen.findByText('カメラを起動できませんでした')).toBeVisible()
+    const cameraOverlay = document.querySelector('.cameraState') as HTMLElement
+    fireEvent.click(within(cameraOverlay).getByRole('button', { name: '戻る' }))
+    expect(screen.getByRole('button', { name: /現金/ })).toBeVisible()
   })
 
   it('switches the customer flow to English', () => {
