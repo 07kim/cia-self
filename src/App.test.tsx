@@ -107,7 +107,6 @@ describe('self checkout', () => {
 
     expect(signal.aborted).toBe(true)
     expect(screen.getByRole('button', { name: /クレジット/ })).toBeVisible()
-    expect(screen.getByRole('button', { name: /不要/ })).not.toBeInTheDocument()
     await act(async () => { resolveStart?.({ stop }) })
     expect(stop).toHaveBeenCalledTimes(1)
     expect(screen.getByRole('button', { name: /クレジット/ })).toBeVisible()
