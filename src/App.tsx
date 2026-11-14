@@ -95,14 +95,23 @@ export function App() {
   const sequenceTimer = useRef<number>(0)
   const videoRef = useRef<HTMLVideoElement>(null)
   const scanner = useRef<ScannerSession | null>(null)
+  const scannerRequest = useRef<AbortController | null>(null)
+  const scannerTimeout = useRef<number>(0)
   const lastRead = useRef({ code: '', at: 0 })
   const lastCornerInput = useRef<{ corner: Corner | null; at: number }>({ corner: null, at: Number.NEGATIVE_INFINITY })
   const sequenceRef = useRef(0)
   const { muted, play, toggleMuted, unlock } = useAudio()
 
-  const goHome = useCallback(() => {
+  const stopScanner = useCallback(() => {
+    window.clearTimeout(scannerTimeout.current)
+    scannerRequest.current?.abort()
+    scannerRequest.current = null
     scanner.current?.stop()
     scanner.current = null
+  }, [])
+
+  const goHome = useCallback(() => {
+    stopScanner()
     setScreen('home')
     setSequence(0)
     setAnswer('')
@@ -124,13 +133,13 @@ export function App() {
     window.clearTimeout(sequenceTimer.current)
     sequenceRef.current = 0
     lastCornerInput.current = { corner: null, at: Number.NEGATIVE_INFINITY }
-  }, [])
+  }, [stopScanner])
 
   useEffect(() => () => {
-    scanner.current?.stop()
+    stopScanner()
     window.clearTimeout(feedbackTimer.current)
     window.clearTimeout(sequenceTimer.current)
-  }, [])
+  }, [stopScanner])
 
   const announce = useCallback((next: Exclude<Feedback, null>) => {
     setFeedback(next)
@@ -160,12 +169,34 @@ export function App() {
   }, [announce, locale, play])
 
   const startScanner = useCallback(async () => {
-    if (!videoRef.current || scanner.current) return
+    if (!videoRef.current || scanner.current || scannerRequest.current) return
+    const request = new AbortController()
+    scannerRequest.current = request
+    setScannerState('requesting-permission')
+    const timeout = window.setTimeout(() => {
+      if (scannerRequest.current !== request) return
+      scannerRequest.current = null
+      request.abort()
+      setScannerState('unavailable')
+    }, 20_000)
+    scannerTimeout.current = timeout
     try {
-      scanner.current = await startBarcodeScanner(videoRef.current, onBarcode)
+      const session = await startBarcodeScanner(videoRef.current, (code) => {
+        if (!request.signal.aborted && scannerRequest.current === request) onBarcode(code)
+      }, request.signal)
+      if (request.signal.aborted || scannerRequest.current !== request) {
+        session.stop()
+        return
+      }
+      scanner.current = session
       setScannerState('scanning')
     } catch (error) {
-      setScannerState(scannerErrorState(error))
+      if (!request.signal.aborted && scannerRequest.current === request) {
+        setScannerState(scannerErrorState(error))
+      }
+    } finally {
+      window.clearTimeout(timeout)
+      if (scannerRequest.current === request) scannerRequest.current = null
     }
   }, [onBarcode])
 
@@ -174,10 +205,15 @@ export function App() {
     const startTimer = window.setTimeout(() => void startScanner(), 0)
     return () => {
       window.clearTimeout(startTimer)
-      scanner.current?.stop()
-      scanner.current = null
+      stopScanner()
     }
-  }, [screen, startScanner])
+  }, [screen, startScanner, stopScanner])
+
+  const backToPayment = () => {
+    stopScanner()
+    setScannerState('idle')
+    setScreen('payment')
+  }
 
   const touchCorner = (corner: Corner) => {
     const current = sequenceRef.current
@@ -186,8 +222,7 @@ export function App() {
     setSequence(next)
     if (next === 4) {
       window.clearTimeout(sequenceTimer.current)
-      scanner.current?.stop()
-      scanner.current = null
+      stopScanner()
       setSequence(0)
       sequenceRef.current = 0
       setScreen('lock')
@@ -409,8 +444,9 @@ const callStaff = () => {
                   {scannerState !== 'scanning' ? (
                     <div className="cameraState">
                       {scannerState === 'requesting-permission' ? <><b>{isJa ? 'カメラを準備しています' : 'Preparing camera'}</b><span>CAMERA STARTING</span></> : null}
-                      {scannerState === 'permission-denied' ? <><b>{isJa ? 'カメラの使用が許可されていません' : 'Camera access is not allowed'}</b><span>{isJa ? 'ブラウザの設定からカメラを許可してください' : 'Allow camera access in your browser settings'}</span><button onClick={() => { setScannerState('requesting-permission'); void startScanner() }}>{isJa ? 'もう一度試す' : 'Try again'}</button></> : null}
-                      {scannerState === 'unavailable' ? <><b>{isJa ? 'カメラを起動できませんでした' : 'Camera could not be started'}</b><span>{isJa ? '対応端末またはカメラ設定をご確認ください' : 'Check this device and its camera settings'}</span><button onClick={() => { setScannerState('requesting-permission'); void startScanner() }}>{isJa ? '再接続' : 'Reconnect'}</button></> : null}
+                      {scannerState === 'permission-denied' ? <><b>{isJa ? 'カメラの使用が許可されていません' : 'Camera access is not allowed'}</b><span>{isJa ? 'ブラウザの設定からカメラを許可してください' : 'Allow camera access in your browser settings'}</span><button onClick={() => { void startScanner() }}>{isJa ? 'もう一度試す' : 'Try again'}</button></> : null}
+                      {scannerState === 'unavailable' ? <><b>{isJa ? 'カメラを起動できませんでした' : 'Camera could not be started'}</b><span>{isJa ? 'カメラの設定を確認するか、もう一度お試しください' : 'Check camera settings or try again'}</span><button onClick={() => { void startScanner() }}>{isJa ? '再接続' : 'Reconnect'}</button></> : null}
+                      <button className="cameraBack" onClick={backToPayment} type="button">{isJa ? '戻る' : 'Back'}</button>
                     </div>
                   ) : null}
                   <div className="cameraStatus"><i />{scannerState === 'scanning' ? (isJa ? '読取待機中' : 'Ready to scan') : (isJa ? 'カメラ確認中' : 'Checking camera')}</div>
@@ -446,7 +482,7 @@ const callStaff = () => {
               </section>
 
               <footer className="checkoutFooter">
-                <button onClick={goHome} type="button">{isJa ? 'はじめに戻る' : 'Start over'}</button>
+                <button onClick={backToPayment} type="button">{isJa ? '戻る' : 'Back'}</button>
                 <span>{isJa ? `ポイント: ${pointChoice} / レジ袋: ${bagChoice} / 支払: ${paymentChoice}` : `Points: ${pointChoice} / Bag: ${bagChoice} / Payment: ${paymentChoice}`}</span>
                 <button onClick={requestStaff} type="button">{isJa ? '係員を呼ぶ' : 'Call attendant'}</button>
               </footer>
