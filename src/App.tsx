@@ -196,7 +196,8 @@ export function App() {
       }
     } finally {
       window.clearTimeout(timeout)
-      if (scannerRequest.current === request) scannerRequest.current = null
+      // Keep the request token while scanning so late barcode callbacks can be ignored after leaving.
+      if (!scanner.current && scannerRequest.current === request) scannerRequest.current = null
     }
   }, [onBarcode])
 
