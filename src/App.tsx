@@ -41,7 +41,7 @@ type Locale = 'ja' | 'en'
 
 const corners: Corner[] = ['tl', 'tr', 'bl', 'br']
 const Z_SEQUENCE_LIMIT_MS = 2_500
-const CUSTOMER_IDLE_WARNING_MS = 15_000
+const CUSTOMER_IDLE_WARNING_MS = 10_000
 const CUSTOMER_IDLE_RETURN_MS = 10_000
 const KEYBOARD_BOTTOM_ROW = ['z', 'x', 'c', 'v', 'b', 'n', 'm', '@', '-', 'ー']
 const CUSTOMER_SCREENS: Screen[] = ['points', 'pointScan', 'bag', 'payment', 'checkout', 'settlement']
@@ -640,8 +640,10 @@ const callStaff = () => {
 
       {idleWarningVisible ? (
         <div aria-live="assertive" className="idleWarning" role="status">
-          <strong>ホーム画面に戻ります</strong>
-          <span>10秒間操作がなければ戻ります</span>
+          <div className="idleWarningCard">
+            <strong>まもなくホーム画面に戻ります</strong>
+            <span>操作すると、そのまま続けられます</span>
+          </div>
         </div>
       ) : null}
     </main>
