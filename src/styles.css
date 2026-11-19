@@ -897,21 +897,29 @@ button { cursor: pointer; }
 .largeText .checkoutGrid { font-size: 1.08em; }
 
 .lock { height: 100dvh; min-height: 0; display: grid; place-items: center; overflow: hidden; padding: max(24px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left)); background: #edf2f6; }
-.lockcard { width: min(1180px, 100%); display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(360px, .8fr); gap: clamp(24px, 4vw, 48px); padding: clamp(24px, 4vw, 44px); border: 1px solid var(--line); border-radius: 22px; background: #fff; box-shadow: 0 24px 70px #20384f26; }
+.lockcard { width: min(1180px, 100%); display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, .8fr); gap: clamp(24px, 4vw, 48px); padding: clamp(24px, 4vw, 44px); border: 1px solid var(--line); border-radius: 22px; background: #fff; box-shadow: 0 24px 70px #20384f26; }
+.lockcard > * { min-width: 0; }
 .lockPuzzleImage { width: 100%; aspect-ratio: 297 / 210; max-height: 62vh; align-self: center; object-fit: contain; border: 1px solid #d7dee5; background: #f7f9fa; }
 .lockAuth { min-width: 0; display: grid; align-content: center; gap: 16px; }
 .lockAuth > span { color: var(--blue); font-weight: 700; }
 .lockAuth h1 { margin: 6px 0 0; }
 .lockAuth .answerGuide { margin: -6px 0 2px; color: #607385; font-size: 14px; }
-.lockAuth input { min-width: 0; padding: 18px; border: 2px solid #c1ced9; border-radius: 10px; font-size: 20px; }
-.virtualKeyboard { display: grid; gap: 7px; padding-top: 2px; user-select: none; }
-.keyboardModes, .keyboardActions { display: flex; gap: 6px; justify-content: center; }
+.lockAuth input { width: 100%; min-width: 0; padding: 18px; border: 2px solid #c1ced9; border-radius: 10px; font-size: 20px; cursor: pointer; }
+.keyboardPopupLayer { position: fixed; z-index: 20; inset: 0; display: grid; place-items: end center; padding: 20px; background: #12263c35; }
+.keyboardPopup { width: min(760px, 100%); display: grid; gap: 10px; padding: 18px; border: 1px solid #cad7e2; border-radius: 18px; background: #fff; box-shadow: 0 18px 55px #17324c40; }
+.keyboardPopupHeader { display: flex; align-items: center; gap: 12px; color: #24394d; }
+.keyboardPopupHeader span { margin-left: auto; color: var(--blue); font-size: 14px; font-weight: 700; }
+.keyboardPopupClose { min-width: 38px !important; min-height: 38px !important; padding: 0 !important; border-radius: 50% !important; background: #eef3f7 !important; color: #405367 !important; font-size: 24px; }
+.keyboardToggle { display: flex; width: min(280px, 100%); margin: 0 auto; padding: 3px; border: 1px solid #aebdcc; border-radius: 999px; background: #f3f6f8; }
+.keyboardToggle button { flex: 1; min-height: 40px; padding: 8px 18px; border: 0; border-radius: 999px; background: transparent; color: #506274; }
+.keyboardToggle button.active { background: var(--blue); color: #fff; box-shadow: 0 2px 5px #125fca55; }
 .keyboardRow { display: flex; justify-content: center; gap: clamp(5px, .7vw, 9px); }
-.virtualKeyboard button { min-width: 0; min-height: clamp(42px, 6vh, 62px); padding: 8px 4px; border: 1px solid #c7d3dc; border-radius: 9px; background: #f4f7f9; color: #24394d; font-weight: 700; box-shadow: 0 1px 0 #d4dde4; }
-.keyboardRow button { flex: 0 1 clamp(42px, 4.7vw, 66px); aspect-ratio: 1; }
-.virtualKeyboard .keyboardModes button { min-height: 36px; flex: 0 1 130px; color: #5c7080; }
-.virtualKeyboard .keyboardModes button.active { background: var(--blue); color: #fff; border-color: var(--blue); }
-.virtualKeyboard .keyboardActions button { min-height: 38px; background: #fff; }
+.keyboardPopup button { min-width: 0; min-height: clamp(42px, 6vh, 62px); padding: 8px 4px; border: 1px solid #c7d3dc; border-radius: 9px; background: #f4f7f9; color: #24394d; font-weight: 700; box-shadow: 0 1px 0 #d4dde4; }
+.keyboardToggle button { min-height: 40px; padding: 8px 18px; border: 0; border-radius: 999px; background: transparent; box-shadow: none; color: #506274; }
+.keyboardToggle button.active { background: var(--blue); color: #fff; }
+.keyboardRow button { flex: 1 1 0; aspect-ratio: 1; }
+.keyboardActions { display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 8px; }
+.keyboardActions button { min-height: 46px; background: #f4f7f9; }
 .lockAuth button { min-height: 54px; padding: 17px; border: 0; border-radius: 10px; background: var(--blue); color: #fff; font-weight: 700; }
 .lockAuth button:disabled { opacity: .45; }
 .lockActions { display: grid; grid-template-columns: minmax(96px, .7fr) minmax(140px, 1.3fr); gap: 10px; }
@@ -1158,6 +1166,10 @@ button { cursor: pointer; }
   .idAuthCopy p { display: none; }
   .lock { padding: 12px; }
   .lockcard { grid-template-columns: 1fr; padding: 24px 16px; border-radius: 16px; }
+  .keyboardPopupLayer { padding: 10px; }
+  .keyboardPopup { padding: 12px; border-radius: 14px; }
+  .keyboardPopup button { min-height: 44px; }
+  .keyboardRow { gap: 4px; }
   .idKeypadPanel, .puzzleForm { padding: 16px; }
   .numberPad button { min-height: 58px; }
   .puzzleSettingsLayout { width: calc(100% - 24px); }
