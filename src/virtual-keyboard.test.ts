@@ -7,6 +7,8 @@ describe('romaji conversion', () => {
     expect(consumeRomaji('shi')).toEqual({ output: 'シ', rest: '' })
     expect(consumeRomaji('zi')).toEqual({ output: 'ジ', rest: '' })
     expect(consumeRomaji('zyo')).toEqual({ output: 'ジョ', rest: '' })
+    expect(consumeRomaji('xi')).toEqual({ output: 'ィ', rest: '' })
+    expect(consumeRomaji('di')).toEqual({ output: 'ヂ', rest: '' })
   })
 
   it('supports doubled consonants and pending n', () => {
