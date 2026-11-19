@@ -69,6 +69,7 @@ export function App() {
   const [answer, setAnswer] = useState('')
   const [keyboardMode, setKeyboardMode] = useState<'en' | 'ja'>('ja')
   const [keyboardOpen, setKeyboardOpen] = useState(false)
+  const [shiftActive, setShiftActive] = useState(false)
   const [romanBuffer, setRomanBuffer] = useState('')
   const [denied, setDenied] = useState(false)
   const [query, setQuery] = useState('')
@@ -99,6 +100,7 @@ export function App() {
     setRomanBuffer('')
     setKeyboardMode('ja')
     setKeyboardOpen(false)
+    setShiftActive(false)
     setDenied(false)
     setQuery('')
     setSelected(null)
@@ -175,6 +177,10 @@ export function App() {
       else setAnswer((current) => current.slice(0, -1))
       return
     }
+    if (key === 'shift') {
+      setShiftActive((current) => !current)
+      return
+    }
     if (key === 'space') {
       setRomanBuffer('')
       setAnswer((current) => `${current} `)
@@ -185,8 +191,9 @@ export function App() {
       setAnswer((current) => `${current}${key}`)
       return
     }
-    if (keyboardMode === 'en') { setAnswer((current) => `${current}${key}`); return }
-    const next = `${romanBuffer}${key}`
+    const typedKey = shiftActive ? key.toUpperCase() : key
+    if (keyboardMode === 'en') { setAnswer((current) => `${current}${typedKey}`); return }
+    const next = `${romanBuffer}${typedKey.toLowerCase()}`
     const consumed = consumeRomaji(next)
     setRomanBuffer(consumed.rest)
     if (consumed.output) setAnswer((current) => `${current}${consumed.output}`)
@@ -479,8 +486,7 @@ const callStaff = () => {
             <div className="lockAuth">
               <span>管理機能認証</span>
               <h1>システムパスワード</h1>
-              <p className="answerGuide" id="answer-guide">カタカナで入力してください</p>
-              <input aria-describedby="answer-guide" aria-label="システムパスワード" inputMode="none" onChange={(event) => { setAnswer(event.target.value); setRomanBuffer('') }} onClick={() => setKeyboardOpen(true)} onFocus={(event) => event.currentTarget.blur()} readOnly value={answer} />
+              <input aria-label="システムパスワード" inputMode="none" onChange={(event) => { setAnswer(event.target.value); setRomanBuffer('') }} onClick={() => setKeyboardOpen(true)} onFocus={(event) => event.currentTarget.blur()} readOnly value={answer} />
               <div className="lockActions">
                 <button className="lockBack" onClick={goHome} type="button">戻る</button>
                 <button disabled={!answer.trim()} onClick={authenticate} type="button">認証</button>
@@ -492,11 +498,12 @@ const callStaff = () => {
             <div className="keyboardPopupLayer" onPointerDown={(event) => { if (event.currentTarget === event.target) setKeyboardOpen(false) }}>
               <div aria-label="画面キーボード" className="keyboardPopup" role="dialog">
                 <div className="keyboardPopupHeader"><strong>入力キーボード</strong><span>現在: {keyboardMode === 'en' ? '英字' : '日本語'}</span><button aria-label="キーボードを閉じる" className="keyboardPopupClose" onClick={() => setKeyboardOpen(false)} type="button">×</button></div>
-                <div aria-live="polite" className="keyboardPreview"><small>入力内容</small><strong>{answer || 'ここに入力内容が表示されます'}</strong></div>
+                <div aria-live="polite" className="keyboardPreview"><small>入力内容</small><strong>{answer || '\u00a0'}</strong></div>
                 <div aria-label="入力モード" className="keyboardToggle" role="group"><button aria-pressed={keyboardMode === 'en'} className={keyboardMode === 'en' ? 'active' : ''} onClick={() => { setKeyboardMode('en'); setRomanBuffer('') }} type="button">英字</button><button aria-pressed={keyboardMode === 'ja'} className={keyboardMode === 'ja' ? 'active' : ''} onClick={() => { setKeyboardMode('ja'); setRomanBuffer('') }} type="button">日本語</button></div>
-                {QWERTY_ROWS.slice(0, 2).map((row) => <div className="keyboardRow" key={row}>{[...row].map((key) => <button key={key} onClick={() => pressKeyboardKey(key)} type="button">{key.toUpperCase()}</button>)}</div>)}
-                <div className="keyboardRow keyboardBottomRow">{KEYBOARD_BOTTOM_ROW.map((key) => <button key={key} onClick={() => pressKeyboardKey(key)} type="button">{key === 'ー' ? 'ー' : key.toUpperCase()}</button>)}</div>
-                <div className="keyboardActions"><button onClick={() => pressKeyboardKey('space')} type="button">スペース</button><button onClick={() => pressKeyboardKey('backspace')} type="button">⌫</button><button onClick={() => { setAnswer(''); setRomanBuffer('') }} type="button">クリア</button></div>
+                <div className="keyboardRow">{[...QWERTY_ROWS[0]].map((key) => <button key={key} onClick={() => pressKeyboardKey(key)} type="button">{key.toUpperCase()}</button>)}<button aria-label="バックスペース" className="keyboardWideKey" onClick={() => pressKeyboardKey('backspace')} type="button">⌫</button></div>
+                <div className="keyboardRow">{[...QWERTY_ROWS[1]].map((key) => <button key={key} onClick={() => pressKeyboardKey(key)} type="button">{key.toUpperCase()}</button>)}</div>
+                <div className="keyboardRow keyboardBottomRow"><button aria-pressed={shiftActive} className={`keyboardWideKey ${shiftActive ? 'active' : ''}`} onClick={() => pressKeyboardKey('shift')} type="button">⇧</button>{KEYBOARD_BOTTOM_ROW.map((key) => <button key={key} onClick={() => pressKeyboardKey(key)} type="button">{key === 'ー' ? 'ー' : key.toUpperCase()}</button>)}</div>
+                <div className="keyboardActions"><button onClick={() => pressKeyboardKey('space')} type="button">スペース</button><button onClick={() => { setAnswer(''); setRomanBuffer('') }} type="button">クリア</button></div>
               </div>
             </div>
           ) : null}

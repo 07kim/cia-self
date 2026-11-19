@@ -921,6 +921,8 @@ button { cursor: pointer; }
 .keyboardToggle button { min-height: 40px; padding: 8px 18px; border: 0; border-radius: 999px; background: transparent; box-shadow: none; color: #506274; }
 .keyboardToggle button.active { background: var(--blue); color: #fff; }
 .keyboardRow button { flex: 1 1 0; aspect-ratio: 1; }
+.keyboardRow .keyboardWideKey { flex: 1.35 1 0; aspect-ratio: auto; }
+.keyboardRow .keyboardWideKey.active { border-color: var(--blue); background: var(--blue); color: #fff; }
 .keyboardActions { display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 8px; }
 .keyboardActions button { min-height: 46px; background: #f4f7f9; }
 .lockAuth button { min-height: 54px; padding: 17px; border: 0; border-radius: 10px; background: var(--blue); color: #fff; font-weight: 700; }
