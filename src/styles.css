@@ -903,6 +903,14 @@ button { cursor: pointer; }
 .lockAuth h1 { margin: 6px 0 0; }
 .lockAuth .answerGuide { margin: -6px 0 2px; color: #607385; font-size: 14px; }
 .lockAuth input { min-width: 0; padding: 18px; border: 2px solid #c1ced9; border-radius: 10px; font-size: 20px; }
+.virtualKeyboard { display: grid; gap: 7px; padding-top: 2px; user-select: none; }
+.keyboardModes, .keyboardRow, .keyboardActions { display: flex; gap: 6px; justify-content: center; }
+.virtualKeyboard button { min-height: 42px; flex: 1; padding: 8px 6px; border: 1px solid #c7d3dc; border-radius: 7px; background: #f4f7f9; color: #24394d; font-weight: 700; box-shadow: 0 1px 0 #d4dde4; }
+.virtualKeyboard .keyboardModes button { min-height: 36px; flex: 0 1 130px; color: #5c7080; }
+.virtualKeyboard .keyboardModes button.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+.virtualKeyboard .keyboardActions button { min-height: 38px; background: #fff; }
+.kanaGrid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 5px; }
+.kanaGrid button { min-height: 36px; }
 .lockAuth button { min-height: 54px; padding: 17px; border: 0; border-radius: 10px; background: var(--blue); color: #fff; font-weight: 700; }
 .lockAuth button:disabled { opacity: .45; }
 .lockActions { display: grid; grid-template-columns: minmax(96px, .7fr) minmax(140px, 1.3fr); gap: 10px; }
