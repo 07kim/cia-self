@@ -8,7 +8,6 @@ import {
   CreditCard,
   Languages,
   KeyRound,
-  ImageUp,
   Nfc,
   Package,
   QrCode,
@@ -20,17 +19,10 @@ import {
   WalletCards,
 } from 'lucide-react'
 import { useAudio } from './audio'
-import {
-  scannerErrorState,
-  startBarcodeScanner,
-  type ScannerSession,
-  type ScannerState,
-} from './barcode-scanner'
 import { findProduct, products, type Product } from './catalog'
 import { searchTransactions, total, type Transaction } from './data'
 import {
   loadPuzzleSettings,
-  MAX_PUZZLE_IMAGE_BYTES,
   normalizePuzzlePassword,
   resetPuzzleSettings,
   savePuzzleSettings,
@@ -42,11 +34,10 @@ type Corner = 'tl' | 'tr' | 'br' | 'bl'
 type HomeDialog = 'guide' | 'staffConfirm' | 'staffCalled' | null
 type EmployeeView = 'menu' | 'catalog' | 'terminal' | 'settings'
 type CartLine = Product & { qty: number }
-type Feedback = { tone: 'success' | 'error'; title: string; detail: string } | null
 type Locale = 'ja' | 'en'
 
 const corners: Corner[] = ['tl', 'tr', 'bl', 'br']
-const Z_SEQUENCE_LIMIT_MS = 6_000
+const Z_SEQUENCE_LIMIT_MS = 2_500
 
 function KioskProgress({ current, locale }: { current: 'points' | 'bag' | 'payment' | 'checkout' | 'settlement'; locale: Locale }) {
   const steps = [
@@ -76,8 +67,6 @@ export function App() {
   const [query, setQuery] = useState('')
   const [selected, setSelected] = useState<Transaction | null>(null)
   const [cart, setCart] = useState<CartLine[]>([])
-  const [scannerState, setScannerState] = useState<ScannerState>('idle')
-  const [feedback, setFeedback] = useState<Feedback>(null)
   const [dialog, setDialog] = useState<HomeDialog>(null)
   const [largeText, setLargeText] = useState(false)
   const [locale, setLocale] = useState<Locale>('ja')
@@ -91,18 +80,12 @@ export function App() {
   const [puzzleDraft, setPuzzleDraft] = useState<PuzzleSettings>(() => loadPuzzleSettings())
   const [settingsMessage, setSettingsMessage] = useState('')
   const [settingsError, setSettingsError] = useState('')
-  const feedbackTimer = useRef<number>(0)
   const sequenceTimer = useRef<number>(0)
-  const videoRef = useRef<HTMLVideoElement>(null)
-  const scanner = useRef<ScannerSession | null>(null)
-  const lastRead = useRef({ code: '', at: 0 })
   const lastCornerInput = useRef<{ corner: Corner | null; at: number }>({ corner: null, at: Number.NEGATIVE_INFINITY })
   const sequenceRef = useRef(0)
   const { muted, play, toggleMuted, unlock } = useAudio()
 
   const goHome = useCallback(() => {
-    scanner.current?.stop()
-    scanner.current = null
     setScreen('home')
     setSequence(0)
     setAnswer('')
@@ -110,8 +93,6 @@ export function App() {
     setQuery('')
     setSelected(null)
     setCart([])
-    setScannerState('idle')
-    setFeedback(null)
     setDialog(null)
     setPointChoice('未選択')
     setBagChoice('未選択')
@@ -127,57 +108,8 @@ export function App() {
   }, [])
 
   useEffect(() => () => {
-    scanner.current?.stop()
-    window.clearTimeout(feedbackTimer.current)
     window.clearTimeout(sequenceTimer.current)
   }, [])
-
-  const announce = useCallback((next: Exclude<Feedback, null>) => {
-    setFeedback(next)
-    window.clearTimeout(feedbackTimer.current)
-    feedbackTimer.current = window.setTimeout(() => setFeedback(null), 2_400)
-  }, [])
-
-  const onBarcode = useCallback((rawCode: string) => {
-    const code = rawCode.trim()
-    const now = Date.now()
-    if (lastRead.current.code === code && now - lastRead.current.at < 1_800) return
-    lastRead.current = { code, at: now }
-    const product = findProduct(code)
-    if (!product) {
-      play('unknown')
-      announce({ tone: 'error', title: locale === 'ja' ? '商品が登録されていません' : 'Item not registered', detail: `${locale === 'ja' ? 'コード' : 'Code'} ${code}` })
-      return
-    }
-    setCart((current) => {
-      const existing = current.find((line) => line.barcode === product.barcode)
-      return existing
-        ? current.map((line) => line.barcode === product.barcode ? { ...line, qty: line.qty + 1 } : line)
-        : [...current, { ...product, qty: 1 }]
-    })
-    play('scan')
-    announce({ tone: 'success', title: locale === 'ja' ? '商品を追加しました' : 'Item added', detail: product.name })
-  }, [announce, locale, play])
-
-  const startScanner = useCallback(async () => {
-    if (!videoRef.current || scanner.current) return
-    try {
-      scanner.current = await startBarcodeScanner(videoRef.current, onBarcode)
-      setScannerState('scanning')
-    } catch (error) {
-      setScannerState(scannerErrorState(error))
-    }
-  }, [onBarcode])
-
-  useEffect(() => {
-    if (screen !== 'checkout') return
-    const startTimer = window.setTimeout(() => void startScanner(), 0)
-    return () => {
-      window.clearTimeout(startTimer)
-      scanner.current?.stop()
-      scanner.current = null
-    }
-  }, [screen, startScanner])
 
   const touchCorner = (corner: Corner) => {
     const current = sequenceRef.current
@@ -186,8 +118,6 @@ export function App() {
     setSequence(next)
     if (next === 4) {
       window.clearTimeout(sequenceTimer.current)
-      scanner.current?.stop()
-      scanner.current = null
       setSequence(0)
       sequenceRef.current = 0
       setScreen('lock')
@@ -248,28 +178,6 @@ export function App() {
     setEmployeeId('')
   }
 
-  const choosePuzzleImage = (file: File | undefined) => {
-    setSettingsMessage('')
-    setSettingsError('')
-    if (!file) return
-    if (!file.type.startsWith('image/')) {
-      setSettingsError('画像ファイルを選択してください。')
-      return
-    }
-    if (file.size > MAX_PUZZLE_IMAGE_BYTES) {
-      setSettingsError('画像は1.5MB以下にしてください。')
-      return
-    }
-    const reader = new FileReader()
-    reader.onload = () => setPuzzleDraft((current) => ({
-      ...current,
-      imageDataUrl: typeof reader.result === 'string' ? reader.result : null,
-      imageName: file.name,
-    }))
-    reader.onerror = () => setSettingsError('画像を読み込めませんでした。')
-    reader.readAsDataURL(file)
-  }
-
   const commitPuzzleSettings = () => {
     setSettingsMessage('')
     setSettingsError('')
@@ -294,13 +202,6 @@ export function App() {
     play('tap')
   }
 
-  const updateQty = (barcode: string, delta: number) => {
-    play('tap')
-    setCart((current) => current
-      .map((line) => line.barcode === barcode ? { ...line, qty: line.qty + delta } : line)
-      .filter((line) => line.qty > 0))
-  }
-
   const choosePoint = (choice: string) => {
     play('tap')
     setPointChoice(choice)
@@ -321,7 +222,8 @@ const requestStaff = () => setDialog('staffConfirm')
 const callStaff = () => {
   const audio = new Audio('/staff-call.mp3')
   audio.volume = 1.0
-  void audio.play().catch(console.error)
+  const playback = audio.play()
+  if (playback) void playback.catch(() => undefined)
   setDialog('staffCalled')
 }
 
@@ -329,7 +231,6 @@ const callStaff = () => {
   const choosePayment = (choice: string) => {
     play('tap')
     setPaymentChoice(choice)
-    setScannerState('requesting-permission')
     setScreen('checkout')
   }
 
@@ -396,67 +297,20 @@ const callStaff = () => {
               </footer>
             </section>
           ) : screen === 'checkout' ? (
-            <section className="checkoutGrid">
+            <section className="pointScanScreen productScanScreen">
               <KioskProgress current="checkout" locale={locale} />
-              <section className="scanPanel">
-                <header>
-                  <span><small>STEP 1</small>{isJa ? '商品を読み取る' : 'Scan items'}</span>
-                  <div className="panelActions"><b>SCAN ITEM</b><button onClick={() => { void unlock(); toggleMuted() }} type="button">{muted ? '音声 OFF' : '音声 ON'}</button></div>
-                </header>
-                <div className={`cameraFrame ${scannerState}`}>
-                  <video aria-label="バーコード読取カメラ" muted playsInline ref={videoRef} />
-                  <div className="scanGuide" aria-hidden="true"><i /><span>{isJa ? 'バーコードを枠内に合わせてください' : 'Place the barcode inside the frame'}</span></div>
-                  {scannerState !== 'scanning' ? (
-                    <div className="cameraState">
-                      {scannerState === 'requesting-permission' ? <><b>{isJa ? 'カメラを準備しています' : 'Preparing camera'}</b><span>CAMERA STARTING</span></> : null}
-                      {scannerState === 'permission-denied' ? <><b>{isJa ? 'カメラの使用が許可されていません' : 'Camera access is not allowed'}</b><span>{isJa ? 'ブラウザの設定からカメラを許可してください' : 'Allow camera access in your browser settings'}</span><button onClick={() => { setScannerState('requesting-permission'); void startScanner() }}>{isJa ? 'もう一度試す' : 'Try again'}</button></> : null}
-                      {scannerState === 'unavailable' ? <><b>{isJa ? 'カメラを起動できませんでした' : 'Camera could not be started'}</b><span>{isJa ? '対応端末またはカメラ設定をご確認ください' : 'Check this device and its camera settings'}</span><button onClick={() => { setScannerState('requesting-permission'); void startScanner() }}>{isJa ? '再接続' : 'Reconnect'}</button></> : null}
-                    </div>
-                  ) : null}
-                  <div className="cameraStatus"><i />{scannerState === 'scanning' ? (isJa ? '読取待機中' : 'Ready to scan') : (isJa ? 'カメラ確認中' : 'Checking camera')}</div>
-                </div>
-                <p>{isJa ? '商品のバーコードをカメラへ向けてください。画面から商品を選ぶことはできません。' : 'Hold the product barcode in front of the camera. Items cannot be selected on screen.'}</p>
-              </section>
-
-              <section className="cartPanel">
-                <header>
-                  <div><span><small>STEP 2</small>{isJa ? 'お買い物かご' : 'Basket'}</span><b>SHOPPING CART</b></div>
-                  <strong>{cartCount}<small>{isJa ? '点' : ' items'}</small></strong>
-                </header>
-                <div className="cartLines">
-                  {cart.length ? cart.map((line) => (
-                    <article className="cartLine" key={line.barcode}>
-                      <span className={`categoryIcon ${line.category}`}>{line.name.slice(0, 1)}</span>
-                      <div><b>{line.name}</b><small>{line.barcode} / 税率 {line.taxRate}%</small></div>
-                      <div className="quantity">
-                        <button aria-label={`${line.name}を1点減らす`} onClick={() => updateQty(line.barcode, -1)} type="button">−</button>
-                        <b>{line.qty}</b>
-                        <button aria-label={`${line.name}を1点増やす`} onClick={() => updateQty(line.barcode, 1)} type="button">＋</button>
-                      </div>
-                      <strong>¥{(line.price * line.qty).toLocaleString()}</strong>
-                    </article>
-                  )) : (
-                    <div className="emptyCart"><i /><b>{isJa ? '商品はまだありません' : 'No items scanned'}</b><span>{isJa ? '左側のカメラでバーコードを読み取ってください' : 'Scan a barcode using the camera'}</span></div>
-                  )}
-                </div>
-                <footer>
-                  <div><span>{isJa ? '合計（税込）' : 'Total'}</span><strong>¥{cartTotal.toLocaleString()}</strong></div>
-                  <button disabled={!cart.length} onClick={() => { play('tap'); setScreen('settlement') }} type="button">{isJa ? '支払いへ' : 'Proceed to payment'}</button>
-                </footer>
-              </section>
-
-              <footer className="checkoutFooter">
-                <button onClick={goHome} type="button">{isJa ? 'はじめに戻る' : 'Start over'}</button>
-                <span>{isJa ? `ポイント: ${pointChoice} / レジ袋: ${bagChoice} / 支払: ${paymentChoice}` : `Points: ${pointChoice} / Bag: ${bagChoice} / Payment: ${paymentChoice}`}</span>
-                <button onClick={requestStaff} type="button">{isJa ? '係員を呼ぶ' : 'Call attendant'}</button>
+              <div className="pointScanPanel">
+                <div className="pointReader" aria-hidden="true"><ScanBarcode /></div>
+                <small>PRODUCT READER</small>
+                <h1>{isJa ? '商品のバーコードを読み取ってください' : 'Scan the product barcode'}</h1>
+                <p>{isJa ? '商品を読み取り部へ近づけてください。' : 'Hold the product near the reader.'}</p>
+                <strong>{isJa ? '読み取りを待っています' : 'Waiting for product'}</strong>
+              </div>
+              <footer className="choiceFooter pointScanFooter">
+                <button onClick={() => setScreen('payment')} type="button">{isJa ? '戻る' : 'Back'}</button>
+                <div><span>{isJa ? '支払方法' : 'Payment'}</span><b>{paymentChoice}</b></div>
+                <button onClick={requestStaff} type="button">{isJa ? '係員' : 'Attendant'}</button>
               </footer>
-
-              {feedback ? (
-                <div aria-live="polite" className={`feedback ${feedback.tone}`} role="status">
-                  <i>{feedback.tone === 'success' ? '✓' : '!'}</i>
-                  <span><b>{feedback.title}</b><small>{feedback.detail}</small></span>
-                </div>
-              ) : null}
             </section>
           ) : screen === 'settlement' ? (
             <section className="settlementScreen">
@@ -553,7 +407,7 @@ const callStaff = () => {
                 {dialog === 'guide' ? (
                   <>
                     <span>HOW TO USE</span><h2>{isJa ? 'セルフレジの使い方' : 'How to use this checkout'}</h2>
-                    <ol><li><b>1</b>{isJa ? 'ポイント・レジ袋・支払方法を選択' : 'Select points, bag and payment method'}</li><li><b>2</b>{isJa ? 'カメラで商品のバーコードを読み取る' : 'Scan each product barcode with the camera'}</li><li><b>3</b>{isJa ? '商品と点数を確認して支払いへ進む' : 'Check your items and proceed to payment'}</li></ol>
+                    <ol><li><b>1</b>{isJa ? 'ポイント・レジ袋・支払方法を選択' : 'Select points, bag and payment method'}</li><li><b>2</b>{isJa ? '商品登録の読取待機画面を確認' : 'Open the product waiting screen'}</li><li><b>3</b>{isJa ? '必要なら係員を呼び出す' : 'Call an attendant if needed'}</li></ol>
                     <button className="dialogPrimary" onClick={beginCheckout} type="button">{isJa ? 'お会計を始める' : 'Start checkout'}</button>
                   </>
                 ) : null}
@@ -580,9 +434,6 @@ const callStaff = () => {
       {screen === 'lock' ? (
         <section className="lock">
           <div className="lockcard">
-            <div className={`puzzle a4Puzzle${puzzleSettings.imageDataUrl ? ' hasImage' : ''}`}>
-              {puzzleSettings.imageDataUrl ? <img alt="設定された謎画像" src={puzzleSettings.imageDataUrl} /> : '謎画像は未設定です'}
-            </div>
             <div className="lockAuth">
               <span>管理機能認証</span>
               <h1>システムパスワード</h1>
@@ -608,7 +459,7 @@ const callStaff = () => {
             <div className="employeeTiles">
               <button onClick={() => setScreen('history')} type="button"><i>履</i><b>購入履歴</b><small>取引・商品明細</small></button>
               <button onClick={() => setEmployeeView('catalog')} type="button"><i>品</i><b>商品台帳</b><small>価格・商品コード</small></button>
-              <button onClick={() => setEmployeeView('terminal')} type="button"><i>端</i><b>端末状態</b><small>カメラ・通信・音声</small></button>
+              <button onClick={() => setEmployeeView('terminal')} type="button"><i>端</i><b>端末状態</b><small>読取待機・音声</small></button>
               <button onClick={() => setEmployeeView('settings')} type="button"><i>設</i><b>取引設定</b><small>会計フロー・税率</small></button>
               <button onClick={() => { setEmployeeId(''); setEmployeeIdError(''); setScreen('employeeId') }} type="button"><i><KeyRound aria-hidden="true" /></i><b>従業員ID認証</b><small>管理用謎設定</small></button>
             </div>
@@ -619,7 +470,7 @@ const callStaff = () => {
                 <><span>PRODUCT MASTER</span><h2>商品台帳</h2><div className="catalogList">{products.map((product) => <div key={product.barcode}><i className={product.category}>{product.name.slice(0, 1)}</i><span><b>{product.name}</b><small>{product.barcode}</small></span><strong>¥{product.price}</strong></div>)}</div></>
               ) : null}
               {employeeView === 'terminal' ? (
-                <><span>TERMINAL STATUS</span><h2>端末状態</h2><div className="statusTiles"><div><b>カメラ</b><strong>READY</strong></div><div><b>商品台帳</b><strong>{products.length} ITEMS</strong></div><div><b>効果音</b><strong>{muted ? 'OFF' : 'ON'}</strong></div><div><b>データ</b><strong>LOCAL</strong></div></div></>
+                <><span>TERMINAL STATUS</span><h2>端末状態</h2><div className="statusTiles"><div><b>商品登録</b><strong>WAITING</strong></div><div><b>商品台帳</b><strong>{products.length} ITEMS</strong></div><div><b>効果音</b><strong>{muted ? 'OFF' : 'ON'}</strong></div><div><b>データ</b><strong>LOCAL</strong></div></div></>
               ) : null}
               {employeeView === 'settings' ? (
                 <><span>TRANSACTION SETTINGS</span><h2>取引設定</h2><div className="settingsList"><div><b>会計フロー</b><span>ポイント → レジ袋 → 支払方法 → 商品登録</span></div><div><b>消費税</b><span>軽減8% / 標準10%</span></div><div><b>履歴保存</b><span>イベント固定データ</span></div></div></>
@@ -652,17 +503,10 @@ const callStaff = () => {
       {screen === 'puzzleSettings' ? (
         <section className="employeeUtility">
           <header><div><span>CIA MART / STAFF CONSOLE</span><h1>謎設定</h1></div><button onClick={() => setScreen('employee')} type="button">従業員メニュー</button></header>
-          <div className="puzzleSettingsLayout">
-            <section className="puzzlePreview">
-              <span>PUZZLE PREVIEW</span><h2>認証画面プレビュー</h2>
-              <div className={`puzzle a4Puzzle${puzzleDraft.imageDataUrl ? ' hasImage' : ''}`}>
-                {puzzleDraft.imageDataUrl ? <img alt="謎画像プレビュー" src={puzzleDraft.imageDataUrl} /> : <><ImageUp aria-hidden="true" /><b>謎画像は未設定です</b></>}
-              </div>
-            </section>
+          <div className="puzzleSettingsLayout passwordOnlySettings">
             <section className="puzzleForm">
+              <span>AUTHENTICATION SETTINGS</span><h2>認証パスワード</h2>
               <div><label htmlFor="puzzle-password">正解パスワード</label><input id="puzzle-password" onChange={(event) => setPuzzleDraft((current) => ({ ...current, password: event.target.value }))} type="text" value={puzzleDraft.password} /></div>
-              <div><label htmlFor="puzzle-image">謎画像</label><label className="filePicker" htmlFor="puzzle-image"><ImageUp aria-hidden="true" /><span><b>画像を選択</b><small>PNG / JPEG / WebP・1.5MB以下</small></span></label><input accept="image/*" id="puzzle-image" onChange={(event) => choosePuzzleImage(event.target.files?.[0])} type="file" /><small className="fileName">{puzzleDraft.imageName || 'ファイル未選択'}</small></div>
-              {puzzleDraft.imageDataUrl ? <button className="removeImage" onClick={() => setPuzzleDraft((current) => ({ ...current, imageDataUrl: null, imageName: null }))} type="button">画像を削除</button> : null}
               {settingsError ? <p className="settingsError" role="alert">{settingsError}</p> : null}
               {settingsMessage ? <p className="settingsSuccess" role="status">{settingsMessage}</p> : null}
               <div className="settingsActions"><button onClick={restorePuzzleSettings} type="button">初期設定に戻す</button><button className="saveSettings" onClick={commitPuzzleSettings} type="button">設定を保存</button></div>

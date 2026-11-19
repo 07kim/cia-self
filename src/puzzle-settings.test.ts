@@ -23,16 +23,12 @@ describe('puzzle settings', () => {
     const storage = memoryStorage()
     expect(loadPuzzleSettings(storage)).toEqual(DEFAULT_PUZZLE_SETTINGS)
     expect(DEFAULT_PUZZLE_SETTINGS.password).toBe('セルフレジ')
-    expect(DEFAULT_PUZZLE_SETTINGS.imageName).toBe('購買.png')
-    expect(DEFAULT_PUZZLE_SETTINGS.imageDataUrl).toMatch(/default-puzzle-shopping\.png/)
   })
 
-  it('normalizes and persists the configured password and image', () => {
+  it('normalizes and persists the configured password', () => {
     const storage = memoryStorage()
     const saved = savePuzzleSettings({
       password: '　バイテン　',
-      imageDataUrl: 'data:image/png;base64,abc',
-      imageName: 'puzzle.png',
     }, storage)
 
     expect(saved.password).toBe('バイテン')
@@ -50,6 +46,6 @@ describe('puzzle settings', () => {
 
   it('uses NFKC matching for participant answers', () => {
     expect(normalizePuzzlePassword('　バイテン　')).toBe('バイテン')
-    expect(normalizePuzzlePassword('ﾚｼｰﾄ')).toBe('レシート')
+    expect(normalizePuzzlePassword('ｾﾙﾌﾚｼﾞ')).toBe('セルフレジ')
   })
 })

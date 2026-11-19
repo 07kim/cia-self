@@ -1,26 +1,15 @@
 import { act, fireEvent, render, screen, within } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-const startBarcodeScanner = vi.fn()
-
-vi.mock('./barcode-scanner', () => ({
-  scannerErrorState: () => 'unavailable',
-  startBarcodeScanner: (...args: unknown[]) => startBarcodeScanner(...args),
-}))
-
 import { App } from './App'
 import { PUZZLE_SETTINGS_STORAGE_KEY } from './puzzle-settings'
 
 describe('self checkout', () => {
   beforeEach(() => {
     window.localStorage.clear()
-    startBarcodeScanner.mockImplementation(async (_video, onCode: (value: string) => void) => {
-      onCode('2000000000091')
-      return { stop: vi.fn() }
-    })
   })
 
-  it('stops at payment after adding a registered item', async () => {
+  it('stops at product scanning without requesting the camera', () => {
     render(<App />)
     expect(screen.getByRole('heading', { name: 'CIA MART 会計端末' })).toBeInTheDocument()
     expect(screen.queryByText('セルフレジ')).not.toBeInTheDocument()
@@ -33,13 +22,11 @@ describe('self checkout', () => {
     fireEvent.click(screen.getByRole('button', { name: /不要/ }))
     fireEvent.click(screen.getByRole('button', { name: /クレジット/ }))
 
-    expect(await screen.findAllByText('梅おにぎり')).toHaveLength(2)
-    expect(screen.getAllByText((_, element) => element?.textContent === '¥160').length).toBeGreaterThan(0)
-    fireEvent.click(screen.getByRole('button', { name: '支払いへ' }))
-    expect(screen.getByRole('heading', { name: 'お支払い' })).toBeInTheDocument()
-    expect(screen.getByText('決済端末からの応答を待っています')).toBeVisible()
-    expect(screen.queryByRole('button', { name: /支払い完了/ })).not.toBeInTheDocument()
-    expect(screen.queryByText('ありがとうございました')).not.toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '商品のバーコードを読み取ってください' })).toBeInTheDocument()
+    expect(screen.getByText('読み取りを待っています')).toBeVisible()
+    expect(screen.queryByRole('video')).not.toBeInTheDocument()
+    expect(screen.queryByText(/カメラ/)).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /次へ|支払いへ/ })).not.toBeInTheDocument()
   })
 
   it('uses confirmation before calling an attendant and changes display mode', () => {
@@ -76,13 +63,13 @@ describe('self checkout', () => {
     expect(screen.queryByRole('button', { name: /次へ/ })).not.toBeInTheDocument()
   })
 
-  it('adds a selected shopping bag to the basket and has no item selection buttons', async () => {
+  it('keeps the selected bag while waiting for a product scan', () => {
     render(<App />)
     fireEvent.click(screen.getByRole('button', { name: 'お会計を始める' }))
     fireEvent.click(screen.getByRole('button', { name: /利用しない/ }))
     fireEvent.click(screen.getByRole('button', { name: /小/ }))
     fireEvent.click(screen.getByRole('button', { name: /クレジット/ }))
-    expect(await screen.findByText('レジ袋 小')).toBeVisible()
+    expect(screen.getByText('商品のバーコードを読み取ってください')).toBeVisible()
     expect(screen.queryByText('商品選択')).not.toBeInTheDocument()
   })
 
@@ -144,7 +131,7 @@ describe('self checkout', () => {
     const passwordInput = screen.getByRole('textbox', { name: 'システムパスワード' })
     expect(passwordInput).not.toHaveAttribute('placeholder')
     expect(passwordInput).not.toHaveFocus()
-    fireEvent.change(passwordInput, { target: { value: 'レシート' } })
+    fireEvent.change(passwordInput, { target: { value: 'セルフレジ' } })
     fireEvent.click(screen.getByRole('button', { name: '認証' }))
 
     expect(screen.getByRole('heading', { name: '従業員モード' })).toBeInTheDocument()
@@ -153,7 +140,7 @@ describe('self checkout', () => {
     expect(screen.getByRole('heading', { name: '購入履歴' })).toBeInTheDocument()
   })
 
-  it('shows an uploaded puzzle image in a dedicated large image region', () => {
+  it('ignores legacy puzzle images and shows password authentication only', () => {
     window.localStorage.setItem(PUZZLE_SETTINGS_STORAGE_KEY, JSON.stringify({
       password: 'ばいてん',
       imageDataUrl: 'data:image/png;base64,cHV6emxl',
@@ -165,16 +152,14 @@ describe('self checkout', () => {
       fireEvent.pointerDown(screen.getByRole('button', { name: `hidden-${corner}` }))
     }
 
-    const image = screen.getByRole('img', { name: '設定された謎画像' })
-    expect(image.closest('.puzzle')).toHaveClass('hasImage')
-    expect(image.closest('.puzzle')).toHaveClass('a4Puzzle')
+    expect(screen.queryByRole('img', { name: '設定された謎画像' })).not.toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'システムパスワード' }).closest('.lockAuth')).not.toBeNull()
   })
 
   it('allows only the configured employee ID to open puzzle settings', () => {
     render(<App />)
     for (const corner of ['tl', 'tr', 'bl', 'br']) fireEvent.pointerDown(screen.getByRole('button', { name: `hidden-${corner}` }))
-    fireEvent.change(screen.getByRole('textbox', { name: 'システムパスワード' }), { target: { value: 'レシート' } })
+    fireEvent.change(screen.getByRole('textbox', { name: 'システムパスワード' }), { target: { value: 'セルフレジ' } })
     fireEvent.click(screen.getByRole('button', { name: '認証' }))
     fireEvent.click(screen.getByRole('button', { name: /従業員ID認証/ }))
 
@@ -191,7 +176,7 @@ describe('self checkout', () => {
   it('uses a saved puzzle password for subsequent management authentication', () => {
     render(<App />)
     for (const corner of ['tl', 'tr', 'bl', 'br']) fireEvent.pointerDown(screen.getByRole('button', { name: `hidden-${corner}` }))
-    fireEvent.change(screen.getByRole('textbox', { name: 'システムパスワード' }), { target: { value: 'レシート' } })
+    fireEvent.change(screen.getByRole('textbox', { name: 'システムパスワード' }), { target: { value: 'セルフレジ' } })
     fireEvent.click(screen.getByRole('button', { name: '認証' }))
     fireEvent.click(screen.getByRole('button', { name: /従業員ID認証/ }))
     for (const digit of '20261107') fireEvent.click(screen.getByRole('button', { name: digit }))
@@ -211,7 +196,7 @@ describe('self checkout', () => {
   it('returns from management authentication to the home screen', () => {
     render(<App />)
     for (const corner of ['tl', 'tr', 'bl', 'br']) fireEvent.pointerDown(screen.getByRole('button', { name: `hidden-${corner}` }))
-    fireEvent.change(screen.getByRole('textbox', { name: 'システムパスワード' }), { target: { value: 'レシート' } })
+    fireEvent.change(screen.getByRole('textbox', { name: 'システムパスワード' }), { target: { value: 'セルフレジ' } })
     fireEvent.click(screen.getByRole('button', { name: '戻る' }))
     expect(screen.getByRole('heading', { name: 'CIA MART 会計端末' })).toBeInTheDocument()
     expect(screen.queryByRole('textbox', { name: 'システムパスワード' })).not.toBeInTheDocument()

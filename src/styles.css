@@ -897,26 +897,9 @@ button { cursor: pointer; }
 .largeText .checkoutGrid { font-size: 1.08em; }
 
 .lock { height: 100dvh; min-height: 0; display: grid; place-items: center; overflow: hidden; padding: max(24px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left)); background: #edf2f6; }
-.lockcard { width: min(1180px, 100%); height: min(720px, calc(100dvh - 48px)); min-height: 520px; display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(300px, .7fr); gap: clamp(24px, 4vw, 56px); padding: clamp(22px, 3vw, 36px); border: 1px solid var(--line); border-radius: 22px; background: #fff; box-shadow: 0 24px 70px #20384f26; }
+.lockcard { width: min(560px, 100%); display: grid; padding: clamp(28px, 5vw, 48px); border: 1px solid var(--line); border-radius: 22px; background: #fff; box-shadow: 0 24px 70px #20384f26; }
 .lockAuth { min-width: 0; display: grid; align-content: center; gap: 16px; }
 .lockAuth > span { color: var(--blue); font-weight: 700; }
-.puzzle { height: 190px; display: grid; place-items: center; border: 2px dashed #b8c6d2; border-radius: 14px; background: var(--soft); color: #8293a2; }
-.puzzle.hasImage { overflow: hidden; border-style: solid; background: #eef2f5; }
-.puzzle img { display: block; width: 100%; height: 100%; object-fit: contain; object-position: center; }
-.lockcard > .puzzle { width: 100%; height: 100%; min-height: 0; }
-.lockcard > .a4Puzzle.hasImage {
-  width: 100%;
-  height: auto;
-  max-width: 100%;
-  max-height: 100%;
-  aspect-ratio: 297 / 210;
-  align-self: center;
-  justify-self: center;
-  border-color: #d7dee5;
-  border-radius: 3px;
-  background: #fff;
-  box-shadow: 0 14px 34px #20384f20;
-}
 .lockAuth h1 { margin: 6px 0 0; }
 .lockAuth .answerGuide { margin: -6px 0 2px; color: #607385; font-size: 14px; }
 .lockAuth input { min-width: 0; padding: 18px; border: 2px solid #c1ced9; border-radius: 10px; font-size: 20px; }
@@ -981,7 +964,7 @@ button { cursor: pointer; }
 .employeeUtility > header h1 { margin: 4px 0 0; font-size: 28px; }
 .employeeUtility > header button { min-height: 48px; padding: 13px 18px; border: 1px solid #ffffff55; border-radius: 9px; background: #fff1; color: #fff; }
 .idAuthLayout { width: min(1100px, calc(100% - 48px)); min-height: 0; display: grid; grid-template-columns: 1fr minmax(360px, 440px); gap: clamp(36px, 7vw, 100px); align-items: center; margin: 0 auto; padding: 28px 0; }
-.idAuthCopy > span, .puzzlePreview > span { color: var(--blue); font-size: 11px; font-weight: 700; letter-spacing: .14em; }
+.idAuthCopy > span { color: var(--blue); font-size: 11px; font-weight: 700; letter-spacing: .14em; }
 .idAuthCopy h2 { margin: 10px 0 18px; font-size: clamp(36px, 5vw, 64px); line-height: 1.14; }
 .idAuthCopy p { max-width: 34em; color: #647688; line-height: 1.7; }
 .idKeypadPanel { display: grid; gap: 12px; padding: 24px; border: 1px solid #cbd6df; border-radius: 18px; background: #fff; }
@@ -995,22 +978,11 @@ button { cursor: pointer; }
 .numberPad .keyAction { color: #536779; font-size: 15px; }
 .verifyId { min-height: 58px; border: 0; border-radius: 10px; background: var(--blue); color: #fff; font-size: 17px; font-weight: 700; }
 .verifyId:disabled { background: #d7dfe6; color: #82909c; }
-.puzzleSettingsLayout { width: min(1180px, calc(100% - 48px)); min-height: 0; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(360px, .9fr); gap: clamp(24px, 4vw, 56px); align-items: center; margin: 0 auto; padding: 28px 0; }
-.puzzlePreview h2 { margin: 8px 0 20px; font-size: clamp(28px, 3vw, 42px); }
-.puzzlePreview .puzzle { height: min(48vh, 430px); }
-.puzzlePreview .a4Puzzle.hasImage { width: 100%; height: auto; max-width: 100%; max-height: min(48vh, 430px); aspect-ratio: 297 / 210; margin-inline: auto; border-radius: 3px; background: #fff; box-shadow: 0 12px 30px #20384f1c; }
-.puzzlePreview .puzzle:not(.hasImage) { grid-auto-flow: row; align-content: center; gap: 14px; }
-.puzzlePreview .puzzle svg { width: 48px; height: 48px; }
+.puzzleSettingsLayout { width: min(620px, calc(100% - 48px)); min-height: 0; display: grid; align-items: center; margin: 0 auto; padding: 28px 0; }
 .puzzleForm { display: grid; gap: 20px; padding: 28px; border: 1px solid #cbd6df; border-radius: 18px; background: #fff; }
 .puzzleForm > div:not(.settingsActions) { display: grid; gap: 9px; }
 .puzzleForm label { color: #405467; font-weight: 700; }
 .puzzleForm input[type='text'] { min-height: 54px; padding: 12px 15px; border: 2px solid #bdcad5; border-radius: 10px; font-size: 19px; }
-.puzzleForm input[type='file'] { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
-.filePicker { min-height: 76px; display: flex; gap: 14px; align-items: center; padding: 14px 16px; border: 2px solid #b9c8d4; border-radius: 11px; color: var(--blue) !important; cursor: pointer; }
-.filePicker svg { flex: 0 0 auto; }
-.filePicker span { display: grid; gap: 3px; }
-.filePicker small, .fileName { color: #748594; font-weight: 500; }
-.removeImage { justify-self: start; min-height: 44px; border: 0; background: transparent; color: var(--red); font-weight: 700; }
 .settingsError, .settingsSuccess { margin: 0; padding: 12px 14px; border-radius: 8px; font-weight: 700; }
 .settingsError { background: #fff0f1; color: var(--red); }
 .settingsSuccess { background: #e9f8ef; color: #167543; }
@@ -1125,12 +1097,8 @@ button { cursor: pointer; }
   .choiceFooter { grid-template-columns: 100px 1fr 100px; }
   .idAuthLayout { grid-template-columns: minmax(0, 1fr) minmax(330px, 390px); gap: 28px; }
   .idAuthCopy h2 { font-size: 38px; }
-  .lock { overflow: auto; align-items: start; }
-  .lockcard { height: auto; min-height: calc(100dvh - 48px); grid-template-columns: 1fr; grid-template-rows: minmax(320px, 48vh) auto; }
-  .lockcard > .puzzle { min-height: 320px; }
-  .lockcard > .a4Puzzle.hasImage { width: 100%; height: auto; min-height: 0; align-self: center; }
+  .lock { overflow: auto; }
   .puzzleSettingsLayout { grid-template-columns: 1fr; align-content: start; overflow: auto; }
-  .puzzlePreview .puzzle { height: 300px; }
   .thead, .table > button { grid-template-columns: 58px 1fr 85px 75px; }
   .thead span:nth-child(2), .table > button span:nth-child(2) { display: none; }
 }
@@ -1176,13 +1144,10 @@ button { cursor: pointer; }
   .idAuthCopy h2 { margin-bottom: 8px; font-size: 30px; }
   .idAuthCopy p { display: none; }
   .lock { padding: 12px; }
-  .lockcard { min-height: calc(100dvh - 24px); grid-template-rows: minmax(240px, 42vh) auto; gap: 18px; padding: 16px; border-radius: 16px; }
-  .lockcard > .puzzle { min-height: 240px; }
-  .lockcard > .a4Puzzle.hasImage { width: 100%; height: auto; min-height: 0; align-self: center; }
+  .lockcard { padding: 24px 16px; border-radius: 16px; }
   .idKeypadPanel, .puzzleForm { padding: 16px; }
   .numberPad button { min-height: 58px; }
   .puzzleSettingsLayout { width: calc(100% - 24px); }
-  .puzzlePreview .puzzle { height: 220px; }
   .settingsActions { grid-template-columns: 1fr; }
   .homeUtilities { flex-wrap: wrap; justify-content: flex-end; }
   .homeUtilities button span { display: none; }
