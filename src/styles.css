@@ -897,7 +897,8 @@ button { cursor: pointer; }
 .largeText .checkoutGrid { font-size: 1.08em; }
 
 .lock { height: 100dvh; min-height: 0; display: grid; place-items: center; overflow: hidden; padding: max(24px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left)); background: #edf2f6; }
-.lockcard { width: min(560px, 100%); display: grid; padding: clamp(28px, 5vw, 48px); border: 1px solid var(--line); border-radius: 22px; background: #fff; box-shadow: 0 24px 70px #20384f26; }
+.lockcard { width: min(980px, 100%); display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(320px, .8fr); gap: 28px; padding: clamp(28px, 5vw, 48px); border: 1px solid var(--line); border-radius: 22px; background: #fff; box-shadow: 0 24px 70px #20384f26; }
+.lockPuzzleImage { width: 100%; max-height: 58vh; align-self: center; object-fit: contain; border: 1px solid #d7dee5; background: #f7f9fa; }
 .lockAuth { min-width: 0; display: grid; align-content: center; gap: 16px; }
 .lockAuth > span { color: var(--blue); font-weight: 700; }
 .lockAuth h1 { margin: 6px 0 0; }
@@ -989,6 +990,10 @@ button { cursor: pointer; }
 .puzzleForm > div:not(.settingsActions) { display: grid; gap: 9px; }
 .puzzleForm label { color: #405467; font-weight: 700; }
 .puzzleForm input[type='text'] { min-height: 54px; padding: 12px 15px; border: 2px solid #bdcad5; border-radius: 10px; font-size: 19px; }
+.puzzleForm input[type='file'] { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.filePicker { min-height: 64px; display: flex; gap: 12px; align-items: center; padding: 12px 14px; border: 2px solid #b9c8d4; border-radius: 10px; color: var(--blue) !important; cursor: pointer; }
+.filePicker span { display: grid; gap: 3px; }
+.filePicker small, .fileName { color: #748594; font-weight: 500; }
 .settingsError, .settingsSuccess { margin: 0; padding: 12px 14px; border-radius: 8px; font-weight: 700; }
 .settingsError { background: #fff0f1; color: var(--red); }
 .settingsSuccess { background: #e9f8ef; color: #167543; }
@@ -1150,7 +1155,7 @@ button { cursor: pointer; }
   .idAuthCopy h2 { margin-bottom: 8px; font-size: 30px; }
   .idAuthCopy p { display: none; }
   .lock { padding: 12px; }
-  .lockcard { padding: 24px 16px; border-radius: 16px; }
+  .lockcard { grid-template-columns: 1fr; padding: 24px 16px; border-radius: 16px; }
   .idKeypadPanel, .puzzleForm { padding: 16px; }
   .numberPad button { min-height: 58px; }
   .puzzleSettingsLayout { width: calc(100% - 24px); }

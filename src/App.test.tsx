@@ -140,7 +140,7 @@ describe('self checkout', () => {
     expect(screen.getByRole('heading', { name: '購入履歴' })).toBeInTheDocument()
   })
 
-  it('ignores legacy puzzle images and shows password authentication only', () => {
+  it('shows a configured puzzle image with password authentication', () => {
     window.localStorage.setItem(PUZZLE_SETTINGS_STORAGE_KEY, JSON.stringify({
       password: 'ばいてん',
       imageDataUrl: 'data:image/png;base64,cHV6emxl',
@@ -152,7 +152,7 @@ describe('self checkout', () => {
       fireEvent.pointerDown(screen.getByRole('button', { name: `hidden-${corner}` }))
     }
 
-    expect(screen.queryByRole('img', { name: '設定された謎画像' })).not.toBeInTheDocument()
+    expect(screen.getByRole('img', { name: '設定された謎画像' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'システムパスワード' }).closest('.lockAuth')).not.toBeNull()
   })
 

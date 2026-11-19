@@ -6,6 +6,7 @@ import {
   BellRing,
   CircleHelp,
   CreditCard,
+  ImageUp,
   Languages,
   KeyRound,
   Nfc,
@@ -29,6 +30,7 @@ import {
   savePuzzleSettings,
   type PuzzleSettings,
 } from './puzzle-settings'
+import { MAX_PUZZLE_IMAGE_BYTES } from './puzzle-settings'
 
 type Screen = 'home' | 'points' | 'pointScan' | 'bag' | 'payment' | 'checkout' | 'settlement' | 'lock' | 'employee' | 'employeeId' | 'puzzleSettings' | 'history'
 type Corner = 'tl' | 'tr' | 'br' | 'bl'
@@ -219,6 +221,13 @@ export function App() {
     setSettingsError('')
     setSettingsMessage('初期設定に戻しました')
     play('tap')
+  }
+
+  const choosePuzzleImage = (file: File | undefined) => {
+    if (!file || !file.type.startsWith('image/') || file.size > MAX_PUZZLE_IMAGE_BYTES) return
+    const reader = new FileReader()
+    reader.onload = () => setPuzzleDraft((current) => ({ ...current, imageDataUrl: typeof reader.result === 'string' ? reader.result : null, imageName: file.name }))
+    reader.readAsDataURL(file)
   }
 
   const choosePoint = (choice: string) => {
@@ -453,6 +462,7 @@ const callStaff = () => {
       {screen === 'lock' ? (
         <section className="lock">
           <div className="lockcard">
+            {puzzleSettings.imageDataUrl ? <img alt="設定された謎画像" className="lockPuzzleImage" src={puzzleSettings.imageDataUrl} /> : null}
             <div className="lockAuth">
               <span>管理機能認証</span>
               <h1>システムパスワード</h1>
@@ -531,6 +541,7 @@ const callStaff = () => {
             <section className="puzzleForm">
               <span>AUTHENTICATION SETTINGS</span><h2>認証パスワード</h2>
               <div><label htmlFor="puzzle-password">正解パスワード</label><input id="puzzle-password" onChange={(event) => setPuzzleDraft((current) => ({ ...current, password: event.target.value }))} type="text" value={puzzleDraft.password} /></div>
+              <div><label htmlFor="puzzle-image">謎画像</label><label className="filePicker" htmlFor="puzzle-image"><ImageUp aria-hidden="true" /><span><b>画像を選択</b><small>PNG / JPEG / WebP・1.5MB以下</small></span></label><input accept="image/*" id="puzzle-image" onChange={(event) => choosePuzzleImage(event.target.files?.[0])} type="file" /><small className="fileName">{puzzleDraft.imageName || 'ファイル未選択'}</small></div>
               {settingsError ? <p className="settingsError" role="alert">{settingsError}</p> : null}
               {settingsMessage ? <p className="settingsSuccess" role="status">{settingsMessage}</p> : null}
               <div className="settingsActions"><button onClick={restorePuzzleSettings} type="button">初期設定に戻す</button><button className="saveSettings" onClick={commitPuzzleSettings} type="button">設定を保存</button></div>
