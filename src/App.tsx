@@ -21,7 +21,7 @@ import {
 import { useAudio } from './audio'
 import { findProduct, products, type Product } from './catalog'
 import { searchTransactions, total, type Transaction } from './data'
-import { consumeRomaji, KANA_KEYS, QWERTY_ROWS } from './virtual-keyboard'
+import { consumeRomaji, QWERTY_ROWS } from './virtual-keyboard'
 import {
   loadPuzzleSettings,
   normalizePuzzlePassword,
@@ -64,7 +64,7 @@ export function App() {
   const [screen, setScreen] = useState<Screen>('home')
   const [sequence, setSequence] = useState(0)
   const [answer, setAnswer] = useState('')
-  const [keyboardMode, setKeyboardMode] = useState<'romaji' | 'kana'>('romaji')
+  const [keyboardMode, setKeyboardMode] = useState<'en' | 'ja'>('ja')
   const [romanBuffer, setRomanBuffer] = useState('')
   const [denied, setDenied] = useState(false)
   const [query, setQuery] = useState('')
@@ -93,7 +93,7 @@ export function App() {
     setSequence(0)
     setAnswer('')
     setRomanBuffer('')
-    setKeyboardMode('romaji')
+    setKeyboardMode('ja')
     setDenied(false)
     setQuery('')
     setSelected(null)
@@ -166,11 +166,11 @@ export function App() {
   const pressKeyboardKey = (key: string) => {
     play('tap')
     if (key === 'backspace') {
-      if (keyboardMode === 'romaji' && romanBuffer) setRomanBuffer((current) => current.slice(0, -1))
+      if (keyboardMode === 'ja' && romanBuffer) setRomanBuffer((current) => current.slice(0, -1))
       else setAnswer((current) => current.slice(0, -1))
       return
     }
-    if (keyboardMode === 'kana') { setAnswer((current) => `${current}${key}`); return }
+    if (keyboardMode === 'en') { setAnswer((current) => `${current}${key}`); return }
     const next = `${romanBuffer}${key}`
     const consumed = consumeRomaji(next)
     setRomanBuffer(consumed.rest)
@@ -459,8 +459,8 @@ const callStaff = () => {
               <p className="answerGuide" id="answer-guide">カタカナで入力してください</p>
               <input aria-describedby="answer-guide" aria-label="システムパスワード" inputMode="none" onChange={(event) => { setAnswer(event.target.value); setRomanBuffer('') }} onFocus={(event) => event.currentTarget.blur()} readOnly value={answer} />
               <div aria-label="画面キーボード" className="virtualKeyboard">
-                <div className="keyboardModes"><button className={keyboardMode === 'romaji' ? 'active' : ''} onClick={() => setKeyboardMode('romaji')} type="button">英字</button><button className={keyboardMode === 'kana' ? 'active' : ''} onClick={() => setKeyboardMode('kana')} type="button">カタカナ</button></div>
-                {keyboardMode === 'romaji' ? QWERTY_ROWS.map((row) => <div className="keyboardRow" key={row}>{[...row].map((key) => <button key={key} onClick={() => pressKeyboardKey(key)} type="button">{key.toUpperCase()}</button>)}</div>) : <div className="kanaGrid">{KANA_KEYS.map((key) => <button key={key} onClick={() => pressKeyboardKey(key)} type="button">{key}</button>)}</div>}
+                <div className="keyboardModes"><button className={keyboardMode === 'en' ? 'active' : ''} onClick={() => { setKeyboardMode('en'); setRomanBuffer('') }} type="button">英字</button><button className={keyboardMode === 'ja' ? 'active' : ''} onClick={() => { setKeyboardMode('ja'); setRomanBuffer('') }} type="button">日本語</button></div>
+                {QWERTY_ROWS.map((row) => <div className="keyboardRow" key={row}>{[...row].map((key) => <button key={key} onClick={() => pressKeyboardKey(key)} type="button">{key.toUpperCase()}</button>)}</div>)}
                 <div className="keyboardActions"><button onClick={() => { setAnswer(''); setRomanBuffer('') }} type="button">クリア</button><button onClick={() => pressKeyboardKey('backspace')} type="button">⌫</button></div>
               </div>
               <div className="lockActions">

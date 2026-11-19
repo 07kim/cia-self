@@ -909,8 +909,6 @@ button { cursor: pointer; }
 .virtualKeyboard .keyboardModes button { min-height: 36px; flex: 0 1 130px; color: #5c7080; }
 .virtualKeyboard .keyboardModes button.active { background: var(--blue); color: #fff; border-color: var(--blue); }
 .virtualKeyboard .keyboardActions button { min-height: 38px; background: #fff; }
-.kanaGrid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 5px; }
-.kanaGrid button { min-height: 36px; }
 .lockAuth button { min-height: 54px; padding: 17px; border: 0; border-radius: 10px; background: var(--blue); color: #fff; font-weight: 700; }
 .lockAuth button:disabled { opacity: .45; }
 .lockActions { display: grid; grid-template-columns: minmax(96px, .7fr) minmax(140px, 1.3fr); gap: 10px; }
