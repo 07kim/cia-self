@@ -85,7 +85,7 @@ describe('self checkout', () => {
     render(<App />)
     fireEvent.click(screen.getByRole('button', { name: 'お会計を始める' }))
     act(() => vi.advanceTimersByTime(10_000))
-    expect(screen.getByRole('status')).toHaveTextContent('まもなくホーム画面に戻ります')
+    expect(screen.getByRole('status')).toHaveTextContent('まもなくホーム画面へ戻ります')
     act(() => vi.advanceTimersByTime(9_999))
     expect(screen.getByRole('heading', { name: 'ポイントカード' })).toBeInTheDocument()
     act(() => vi.advanceTimersByTime(1))

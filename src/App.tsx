@@ -642,8 +642,8 @@ const callStaff = () => {
       {idleWarningVisible ? (
         <div aria-live="assertive" className="idleWarning" role="status">
           <div className="idleWarningCard">
-            <strong>まもなくホーム画面に戻ります</strong>
-            <span>操作すると、そのまま続けられます</span>
+            <strong>まもなくホーム画面へ戻ります</strong>
+            <span>続ける場合は画面を操作してください</span>
           </div>
         </div>
       ) : null}
