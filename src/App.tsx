@@ -147,12 +147,13 @@ export function App() {
 
     idleTimer.current = window.setTimeout(() => {
       setIdleWarningVisible(true)
+      play('tap')
       idleReturnTimer.current = window.setTimeout(() => {
         setIdleWarningVisible(false)
         goHome()
       }, CUSTOMER_IDLE_RETURN_MS)
     }, CUSTOMER_IDLE_WARNING_MS)
-  }, [clearIdleTimers, goHome, screen])
+  }, [clearIdleTimers, goHome, play, screen])
 
   useEffect(() => {
     restartIdleTimer()

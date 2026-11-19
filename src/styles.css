@@ -1222,27 +1222,27 @@ button { cursor: pointer; }
 
 .idleWarningCard {
   display: grid;
-  gap: 8px;
-  max-width: min(620px, 90vw);
-  padding: 24px 34px;
-  border: 1px solid rgb(17 40 61 / 14%);
-  border-radius: 18px;
-  background: rgb(255 255 255 / 94%);
-  box-shadow: 0 14px 36px rgb(17 40 61 / 16%);
-  color: #1a2c3e;
+  gap: 10px;
+  max-width: min(760px, 90vw);
+  padding: 32px 48px;
+  border: 2px solid #8dbaf2;
+  border-radius: 22px;
+  background: #eaf3ff;
+  box-shadow: 0 18px 42px rgb(17 40 61 / 22%), 0 0 0 8px rgb(63 132 224 / 10%);
+  color: #123f78;
   text-align: center;
   animation: idleWarningIn .35s ease-out both;
 }
 
 .idleWarningCard strong {
-  font-size: clamp(22px, 3vw, 36px);
+  font-size: clamp(28px, 3.8vw, 48px);
   letter-spacing: .02em;
   line-height: 1.25;
 }
 
 .idleWarningCard span {
-  color: #607487;
-  font-size: clamp(15px, 1.7vw, 20px);
+  color: #315d91;
+  font-size: clamp(17px, 1.9vw, 24px);
   font-weight: 700;
 }
 
