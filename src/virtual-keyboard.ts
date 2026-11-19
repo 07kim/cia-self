@@ -1,5 +1,5 @@
 const ROMAJI: Record<string, string> = {
-  kya:'キャ', kyi:'キィ', kyu:'キュ', kye:'キェ', kyo:'キョ', sha:'シャ', shu:'シュ', she:'シェ', sho:'ショ', ja:'ジャ', ju:'ジュ', je:'ジェ', jo:'ジョ', cha:'チャ', chu:'チュ', che:'チェ', cho:'チョ', nya:'ニャ', nyu:'ニュ', nye:'ニェ', nyo:'ニョ', hya:'ヒャ', hyu:'ヒュ', hye:'ヒェ', hyo:'ヒョ', mya:'ミャ', myu:'ミュ', mye:'ミェ', myo:'ミョ', rya:'リャ', ryu:'リュ', rye:'リェ', ryo:'リョ', gya:'ギャ', gyu:'ギュ', gye:'ギェ', gyo:'ギョ', bya:'ビャ', byu:'ビュ', byo:'ビョ', pya:'ピャ', pyu:'ピュ', pyo:'ピョ',
+  kya:'キャ', kyi:'キィ', kyu:'キュ', kye:'キェ', kyo:'キョ', sha:'シャ', shu:'シュ', she:'シェ', sho:'ショ', ja:'ジャ', ju:'ジュ', je:'ジェ', jo:'ジョ', zya:'ジャ', zyu:'ジュ', zye:'ジェ', zyo:'ジョ', cha:'チャ', chu:'チュ', che:'チェ', cho:'チョ', nya:'ニャ', nyu:'ニュ', nye:'ニェ', nyo:'ニョ', hya:'ヒャ', hyu:'ヒュ', hye:'ヒェ', hyo:'ヒョ', mya:'ミャ', myu:'ミュ', mye:'ミェ', myo:'ミョ', rya:'リャ', ryu:'リュ', rye:'リェ', ryo:'リョ', gya:'ギャ', gyu:'ギュ', gye:'ギェ', gyo:'ギョ', bya:'ビャ', byu:'ビュ', byo:'ビョ', pya:'ピャ', pyu:'ピュ', pyo:'ピョ',
   tsu:'ツ', tsi:'ツィ', tsa:'ツァ', tse:'ツェ', tso:'ツォ', shi:'シ', chi:'チ', ti:'ティ', di:'ディ', du:'ヅ', fu:'フ', hu:'フ', fa:'ファ', fi:'フィ', fe:'フェ', fo:'フォ', fya:'フィャ', fyu:'フュ', fyo:'フィョ', ji:'ジ', dzu:'ヅ', va:'ヴァ', vi:'ヴィ', vu:'ヴ', ve:'ヴェ', vo:'ヴォ', wi:'ウィ', we:'ウェ', wo:'ヲ',
   ye:'イェ',
   xa:'ァ', xi:'ィ', xu:'ゥ', xe:'ェ', xo:'ォ', xya:'ャ', xyu:'ュ', xyo:'ョ', lya:'ャ', lyu:'ュ', lyo:'ョ', xtsu:'ッ', ltsu:'ッ', xwa:'ヮ', ltu:'ッ',

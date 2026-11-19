@@ -5,6 +5,8 @@ describe('romaji conversion', () => {
   it('supports common alternate spellings', () => {
     expect(consumeRomaji('hu')).toEqual({ output: 'フ', rest: '' })
     expect(consumeRomaji('shi')).toEqual({ output: 'シ', rest: '' })
+    expect(consumeRomaji('zi')).toEqual({ output: 'ジ', rest: '' })
+    expect(consumeRomaji('zyo')).toEqual({ output: 'ジョ', rest: '' })
   })
 
   it('supports doubled consonants and pending n', () => {
