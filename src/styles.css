@@ -906,15 +906,14 @@ button { cursor: pointer; }
 .lockAuth .answerGuide { margin: -6px 0 2px; color: #607385; font-size: 14px; }
 .lockAuth input { width: 100%; min-width: 0; padding: 18px; border: 2px solid #c1ced9; border-radius: 10px; font-size: 20px; cursor: pointer; }
 .keyboardPopupLayer { position: fixed; z-index: 20; inset: 0; display: grid; place-items: end center; padding: 20px; background: #12263c35; }
-.keyboardPopup { width: min(760px, 100%); display: grid; gap: 10px; padding: 18px; border: 1px solid #cad7e2; border-radius: 18px; background: #fff; box-shadow: 0 18px 55px #17324c40; }
+.keyboardPopup { width: min(900px, 100%); display: grid; gap: 10px; padding: 18px; border: 1px solid #cad7e2; border-radius: 18px; background: #fff; box-shadow: 0 18px 55px #17324c40; }
 .keyboardPopupHeader { display: flex; align-items: center; gap: 12px; color: #24394d; }
 .keyboardPopupHeader > div { display: grid; gap: 2px; }
 .keyboardPopupHeader small { color: var(--blue); font-size: 12px; font-weight: 700; }
 .keyboardPopupHeader strong { font-size: 21px; }
 .keyboardPopupHeader span { margin-left: auto; color: var(--blue); font-size: 14px; font-weight: 700; }
 .keyboardPopupClose { min-width: 38px !important; min-height: 38px !important; padding: 0 !important; border-radius: 50% !important; background: #eef3f7 !important; color: #405367 !important; font-size: 24px; }
-.keyboardPreview { display: grid; gap: 4px; min-height: 66px; padding: 10px 14px; border: 2px solid #c1ced9; border-radius: 10px; background: #fbfcfd; }
-.keyboardPreview small { color: #607385; font-size: 12px; font-weight: 700; }
+.keyboardPreview { display: grid; align-items: center; min-height: 66px; padding: 10px 14px; border: 2px solid #c1ced9; border-radius: 10px; background: #fbfcfd; }
 .keyboardPreview strong { min-height: 28px; overflow-wrap: anywhere; color: #17212b; font-size: 24px; letter-spacing: .08em; }
 .keyboardToggle { display: flex; width: min(280px, 100%); margin: 0 auto; padding: 3px; border: 1px solid #aebdcc; border-radius: 999px; background: #f3f6f8; }
 .keyboardToggle button { flex: 1; min-height: 40px; padding: 8px 18px; border: 0; border-radius: 999px; background: transparent; color: #506274; }
@@ -923,13 +922,13 @@ button { cursor: pointer; }
 .keyboardPopup button { min-width: 0; min-height: clamp(42px, 6vh, 62px); padding: 8px 4px; border: 1px solid #c7d3dc; border-radius: 9px; background: #f4f7f9; color: #24394d; font-weight: 700; box-shadow: 0 1px 0 #d4dde4; }
 .keyboardToggle button { min-height: 40px; padding: 8px 18px; border: 0; border-radius: 999px; background: transparent; box-shadow: none; color: #506274; }
 .keyboardToggle button.active { background: var(--blue); color: #fff; }
-.keyboardRow button { flex: 1 1 0; aspect-ratio: 1; }
-.keyboardRow .keyboardWideKey { flex: 1.35 1 0; aspect-ratio: auto; }
+.keyboardRow button { flex: 0 1 clamp(42px, 6vw, 66px); width: clamp(42px, 6vw, 66px); aspect-ratio: 1; }
+.keyboardRow .keyboardWideKey { flex: 0 1 clamp(42px, 6vw, 66px); width: clamp(42px, 6vw, 66px); aspect-ratio: 1; }
 .keyboardRow .keyboardWideKey.active { border-color: var(--blue); background: var(--blue); color: #fff; }
 .keyboardRow .keyboardBackspace { border-color: #a6cee8; background: #e6f5ff; color: #17618d; }
 .keyboardActions { display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 8px; }
 .keyboardActions button { min-height: 46px; background: #f4f7f9; }
-.keyboardActions .keyboardConfirm { background: #fff; color: #506274; }
+.keyboardActions .keyboardConfirm { background: var(--blue); border-color: var(--blue); color: #fff; }
 .lockAuth button { min-height: 54px; padding: 17px; border: 0; border-radius: 10px; background: var(--blue); color: #fff; font-weight: 700; }
 .lockAuth button:disabled { opacity: .45; }
 .lockActions { display: grid; grid-template-columns: minmax(96px, .7fr) minmax(140px, 1.3fr); gap: 10px; }
@@ -1180,6 +1179,7 @@ button { cursor: pointer; }
   .keyboardPopup { padding: 12px; border-radius: 14px; }
   .keyboardPopup button { min-height: 44px; }
   .keyboardRow { gap: 4px; }
+  .keyboardRow button, .keyboardRow .keyboardWideKey { flex-basis: clamp(24px, 8vw, 42px); width: clamp(24px, 8vw, 42px); }
   .idKeypadPanel, .puzzleForm { padding: 16px; }
   .numberPad button { min-height: 58px; }
   .puzzleSettingsLayout { width: calc(100% - 24px); }
