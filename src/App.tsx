@@ -492,6 +492,7 @@ const callStaff = () => {
             <div className="keyboardPopupLayer" onPointerDown={(event) => { if (event.currentTarget === event.target) setKeyboardOpen(false) }}>
               <div aria-label="画面キーボード" className="keyboardPopup" role="dialog">
                 <div className="keyboardPopupHeader"><strong>入力キーボード</strong><span>現在: {keyboardMode === 'en' ? '英字' : '日本語'}</span><button aria-label="キーボードを閉じる" className="keyboardPopupClose" onClick={() => setKeyboardOpen(false)} type="button">×</button></div>
+                <div aria-live="polite" className="keyboardPreview"><small>入力内容</small><strong>{answer || 'ここに入力内容が表示されます'}</strong></div>
                 <div aria-label="入力モード" className="keyboardToggle" role="group"><button aria-pressed={keyboardMode === 'en'} className={keyboardMode === 'en' ? 'active' : ''} onClick={() => { setKeyboardMode('en'); setRomanBuffer('') }} type="button">英字</button><button aria-pressed={keyboardMode === 'ja'} className={keyboardMode === 'ja' ? 'active' : ''} onClick={() => { setKeyboardMode('ja'); setRomanBuffer('') }} type="button">日本語</button></div>
                 {QWERTY_ROWS.slice(0, 2).map((row) => <div className="keyboardRow" key={row}>{[...row].map((key) => <button key={key} onClick={() => pressKeyboardKey(key)} type="button">{key.toUpperCase()}</button>)}</div>)}
                 <div className="keyboardRow keyboardBottomRow">{KEYBOARD_BOTTOM_ROW.map((key) => <button key={key} onClick={() => pressKeyboardKey(key)} type="button">{key === 'ー' ? 'ー' : key.toUpperCase()}</button>)}</div>
