@@ -156,6 +156,15 @@ describe('self checkout', () => {
     expect(screen.getByRole('heading', { name: 'システムパスワード' }).closest('.lockAuth')).not.toBeNull()
   })
 
+  it('keeps an unfinished romaji consonant when a symbol is pressed', () => {
+    render(<App />)
+    for (const corner of ['tl', 'tr', 'bl', 'br']) fireEvent.pointerDown(screen.getByRole('button', { name: `hidden-${corner}` }))
+    fireEvent.click(screen.getByRole('textbox', { name: 'システムパスワード' }))
+    fireEvent.click(screen.getByRole('button', { name: 'm' }))
+    fireEvent.click(screen.getByRole('button', { name: '@' }))
+    expect(screen.getByLabelText('入力内容')).toHaveTextContent('m@')
+  })
+
   it('allows only the configured employee ID to open puzzle settings', () => {
     render(<App />)
     for (const corner of ['tl', 'tr', 'bl', 'br']) fireEvent.pointerDown(screen.getByRole('button', { name: `hidden-${corner}` }))
