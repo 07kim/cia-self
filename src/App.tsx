@@ -514,7 +514,7 @@ const callStaff = () => {
         <section className="employeeMode">
           <header>
             <div><span>CIA MART / STAFF CONSOLE</span><h1>従業員モード</h1></div>
-            <button onClick={goHome} type="button">セルフレジへ戻る</button>
+            <button className="employeeExit" onClick={goHome} type="button">セルフレジへ戻る</button>
           </header>
           {employeeView === 'menu' ? (
             <div className="employeeTiles">
@@ -526,7 +526,7 @@ const callStaff = () => {
             </div>
           ) : (
             <div className="employeePanel">
-              <button className="employeeBack" onClick={() => setEmployeeView('menu')} type="button">← 従業員メニュー</button>
+            <button className="employeeBack" onClick={() => setEmployeeView('menu')} type="button">← 従業員メニュー</button>
               {employeeView === 'catalog' ? (
                 <><span>PRODUCT MASTER</span><h2>商品台帳</h2><div className="catalogList">{products.map((product) => <div key={product.barcode}><i className={product.category}>{product.name.slice(0, 1)}</i><span><b>{product.name}</b><small>{product.barcode}</small></span><strong>¥{product.price}</strong></div>)}</div></>
               ) : null}

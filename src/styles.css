@@ -940,6 +940,7 @@ button { cursor: pointer; }
 .employeeMode > header span { color: #a9bac9; font-size: 11px; letter-spacing: .14em; }
 .employeeMode > header h1 { margin: 4px 0 0; font-size: 28px; }
 .employeeMode > header button { padding: 13px 18px; border: 1px solid #ffffff55; border-radius: 9px; background: #fff1; color: #fff; }
+.employeeMode > header .employeeExit { border-color: #ffffff; background: #fff; color: var(--blue-dark); }
 .employeeTiles {
   width: min(1040px, calc(100% - 44px));
   display: grid;
@@ -967,7 +968,7 @@ button { cursor: pointer; }
 .employeeTiles b { font-size: 28px; }
 .employeeTiles small { align-self: start; color: #718292; }
 .employeePanel { width: min(1080px, calc(100% - 44px)); margin: 0 auto; padding: 30px 0 60px; }
-.employeeBack { margin-bottom: 22px; padding: 12px 16px; border: 1px solid #c8d4de; border-radius: 9px; background: #fff; color: var(--blue-dark); font-weight: 700; }
+.employeeBack { display: block; margin-bottom: 22px; padding: 12px 16px; border: 1px solid #c8d4de; border-radius: 9px; background: #fff; color: var(--blue-dark); font-weight: 700; }
 .employeePanel > span { color: var(--blue); font-size: 11px; font-weight: 700; letter-spacing: .14em; }
 .employeePanel h2 { margin: 6px 0 20px; font-size: 32px; }
 .catalogList { overflow: hidden; border: 1px solid var(--line); border-radius: 14px; background: #fff; }
