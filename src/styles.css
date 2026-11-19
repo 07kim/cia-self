@@ -941,6 +941,7 @@ button { cursor: pointer; }
 .employeeMode > header h1 { margin: 4px 0 0; font-size: 28px; }
 .employeeMode > header button { padding: 13px 18px; border: 1px solid #ffffff55; border-radius: 9px; background: #fff1; color: #fff; }
 .employeeMode > header .employeeExit { border-color: #ffffff; background: #fff; color: var(--blue-dark); }
+.employeeMode > header button, .employeeUtility > header button, .admin > header button { border-color: #fff; background: #fff; color: var(--blue-dark); }
 .employeeTiles {
   width: min(1040px, calc(100% - 44px));
   display: grid;
@@ -1021,7 +1022,7 @@ button { cursor: pointer; }
 .settingsActions button { min-height: 54px; border: 1px solid #bdcad5; border-radius: 10px; background: #fff; color: #42576a; font-weight: 700; }
 .settingsActions .saveSettings { border-color: var(--blue); background: var(--blue); color: #fff; }
 
-.admin { height: 100dvh; display: grid; grid-template-rows: auto auto minmax(0, 1fr); overflow: hidden; background: #f2f5f7; }
+.admin { height: 100dvh; display: grid; grid-template-rows: auto auto minmax(0, 1fr); overflow: hidden; background: #eef2f5; }
 .admin > header { min-height: 104px; display: flex; align-items: center; justify-content: space-between; padding: 18px clamp(24px, 4vw, 54px); background: var(--navy); color: #fff; }
 .admin h1 { margin: 3px 0 0; font-size: clamp(32px, 4vw, 48px); }
 .admin header span { color: #9bb0c3; font-size: 11px; letter-spacing: .14em; }
