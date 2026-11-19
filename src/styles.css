@@ -908,6 +908,9 @@ button { cursor: pointer; }
 .keyboardPopupLayer { position: fixed; z-index: 20; inset: 0; display: grid; place-items: end center; padding: 20px; background: #12263c35; }
 .keyboardPopup { width: min(760px, 100%); display: grid; gap: 10px; padding: 18px; border: 1px solid #cad7e2; border-radius: 18px; background: #fff; box-shadow: 0 18px 55px #17324c40; }
 .keyboardPopupHeader { display: flex; align-items: center; gap: 12px; color: #24394d; }
+.keyboardPopupHeader > div { display: grid; gap: 2px; }
+.keyboardPopupHeader small { color: var(--blue); font-size: 12px; font-weight: 700; }
+.keyboardPopupHeader strong { font-size: 21px; }
 .keyboardPopupHeader span { margin-left: auto; color: var(--blue); font-size: 14px; font-weight: 700; }
 .keyboardPopupClose { min-width: 38px !important; min-height: 38px !important; padding: 0 !important; border-radius: 50% !important; background: #eef3f7 !important; color: #405367 !important; font-size: 24px; }
 .keyboardPreview { display: grid; gap: 4px; min-height: 66px; padding: 10px 14px; border: 2px solid #c1ced9; border-radius: 10px; background: #fbfcfd; }
@@ -923,8 +926,10 @@ button { cursor: pointer; }
 .keyboardRow button { flex: 1 1 0; aspect-ratio: 1; }
 .keyboardRow .keyboardWideKey { flex: 1.35 1 0; aspect-ratio: auto; }
 .keyboardRow .keyboardWideKey.active { border-color: var(--blue); background: var(--blue); color: #fff; }
+.keyboardRow .keyboardBackspace { border-color: #a6cee8; background: #e6f5ff; color: #17618d; }
 .keyboardActions { display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 8px; }
 .keyboardActions button { min-height: 46px; background: #f4f7f9; }
+.keyboardActions .keyboardConfirm { background: #fff; color: #506274; }
 .lockAuth button { min-height: 54px; padding: 17px; border: 0; border-radius: 10px; background: var(--blue); color: #fff; font-weight: 700; }
 .lockAuth button:disabled { opacity: .45; }
 .lockActions { display: grid; grid-template-columns: minmax(96px, .7fr) minmax(140px, 1.3fr); gap: 10px; }
