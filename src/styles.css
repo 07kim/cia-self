@@ -913,8 +913,8 @@ button { cursor: pointer; }
 .keyboardPopupHeader strong { font-size: 21px; }
 .keyboardPopupHeader span { margin-left: auto; color: var(--blue); font-size: 14px; font-weight: 700; }
 .keyboardPopupClose { min-width: 38px !important; min-height: 38px !important; padding: 0 !important; border-radius: 50% !important; background: #eef3f7 !important; color: #405367 !important; font-size: 24px; }
-.keyboardPreview { display: grid; align-items: center; min-height: 66px; padding: 10px 14px; border: 2px solid #c1ced9; border-radius: 10px; background: #fbfcfd; }
-.keyboardPreview strong { min-height: 28px; overflow-wrap: anywhere; color: #17212b; font-size: 24px; letter-spacing: .08em; }
+.keyboardPreview { display: grid; align-items: center; height: 66px; min-height: 66px; max-height: 66px; overflow: hidden; padding: 10px 14px; border: 2px solid #c1ced9; border-radius: 10px; background: #fbfcfd; }
+.keyboardPreview strong { min-height: 28px; overflow-x: auto; overflow-y: hidden; white-space: nowrap; color: #17212b; font-size: 24px; letter-spacing: .08em; }
 .keyboardToggle { display: flex; width: min(280px, 100%); margin: 0 auto; padding: 3px; border: 1px solid #aebdcc; border-radius: 999px; background: #f3f6f8; }
 .keyboardToggle button { flex: 1; min-height: 40px; padding: 8px 18px; border: 0; border-radius: 999px; background: transparent; color: #506274; }
 .keyboardToggle button.active { background: var(--blue); color: #fff; box-shadow: 0 2px 5px #125fca55; }
