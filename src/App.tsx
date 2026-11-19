@@ -41,7 +41,10 @@ type Locale = 'ja' | 'en'
 
 const corners: Corner[] = ['tl', 'tr', 'bl', 'br']
 const Z_SEQUENCE_LIMIT_MS = 2_500
+const CUSTOMER_IDLE_WARNING_MS = 15_000
+const CUSTOMER_IDLE_RETURN_MS = 10_000
 const KEYBOARD_BOTTOM_ROW = ['z', 'x', 'c', 'v', 'b', 'n', 'm', '@', '-', 'ー']
+const CUSTOMER_SCREENS: Screen[] = ['points', 'pointScan', 'bag', 'payment', 'checkout', 'settlement']
 
 function KioskProgress({ current, locale }: { current: 'points' | 'bag' | 'payment' | 'checkout' | 'settlement'; locale: Locale }) {
   const steps = [
@@ -89,9 +92,19 @@ export function App() {
   const [settingsMessage, setSettingsMessage] = useState('')
   const [settingsError, setSettingsError] = useState('')
   const sequenceTimer = useRef<number>(0)
+  const idleTimer = useRef<number>(0)
+  const idleReturnTimer = useRef<number>(0)
+  const [idleWarningVisible, setIdleWarningVisible] = useState(false)
   const lastCornerInput = useRef<{ corner: Corner | null; at: number }>({ corner: null, at: Number.NEGATIVE_INFINITY })
   const sequenceRef = useRef(0)
   const { muted, play, toggleMuted, unlock } = useAudio()
+
+  const clearIdleTimers = useCallback(() => {
+    window.clearTimeout(idleTimer.current)
+    window.clearTimeout(idleReturnTimer.current)
+    idleTimer.current = 0
+    idleReturnTimer.current = 0
+  }, [])
 
   const goHome = useCallback(() => {
     setScreen('home')
@@ -115,13 +128,41 @@ export function App() {
     setSettingsMessage('')
     setSettingsError('')
     window.clearTimeout(sequenceTimer.current)
+    clearIdleTimers()
+    setIdleWarningVisible(false)
     sequenceRef.current = 0
     lastCornerInput.current = { corner: null, at: Number.NEGATIVE_INFINITY }
-  }, [])
+  }, [clearIdleTimers])
 
   useEffect(() => () => {
     window.clearTimeout(sequenceTimer.current)
-  }, [])
+    clearIdleTimers()
+  }, [clearIdleTimers])
+
+  const restartIdleTimer = useCallback(() => {
+    clearIdleTimers()
+    if (!CUSTOMER_SCREENS.includes(screen)) {
+      return
+    }
+
+    idleTimer.current = window.setTimeout(() => {
+      setIdleWarningVisible(true)
+      idleReturnTimer.current = window.setTimeout(() => {
+        setIdleWarningVisible(false)
+        goHome()
+      }, CUSTOMER_IDLE_RETURN_MS)
+    }, CUSTOMER_IDLE_WARNING_MS)
+  }, [clearIdleTimers, goHome, screen])
+
+  useEffect(() => {
+    restartIdleTimer()
+    return clearIdleTimers
+  }, [clearIdleTimers, restartIdleTimer])
+
+  const handleActivity = useCallback(() => {
+    setIdleWarningVisible(false)
+    restartIdleTimer()
+  }, [restartIdleTimer])
 
   const touchCorner = (corner: Corner) => {
     const current = sequenceRef.current
@@ -295,7 +336,7 @@ const callStaff = () => {
   const isJa = locale === 'ja'
 
   return (
-    <main className={`app ${screen}${largeText ? ' largeText' : ''}`}>
+    <main className={`app ${screen}${largeText ? ' largeText' : ''}`} onKeyDown={handleActivity} onPointerDown={handleActivity}>
       {(['home', 'points', 'pointScan', 'bag', 'payment', 'checkout', 'settlement'] as Screen[]).includes(screen) ? (
         <>
           {screen === 'home' ? (
@@ -595,6 +636,13 @@ const callStaff = () => {
             </aside>
           </div>
         </section>
+      ) : null}
+
+      {idleWarningVisible ? (
+        <div aria-live="assertive" className="idleWarning" role="status">
+          <strong>ホーム画面に戻ります</strong>
+          <span>10秒間操作がなければ戻ります</span>
+        </div>
       ) : null}
     </main>
   )

@@ -1204,3 +1204,28 @@ button { cursor: pointer; }
   .settingsList > div { grid-template-columns: 1fr; gap: 6px; }
 }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
+
+.idleWarning {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-content: center;
+  gap: 18px;
+  padding: 40px;
+  background: rgb(17 40 61 / 96%);
+  color: #fff;
+  text-align: center;
+}
+
+.idleWarning strong {
+  font-size: clamp(42px, 7vw, 96px);
+  letter-spacing: .03em;
+  line-height: 1.15;
+}
+
+.idleWarning span {
+  color: #c9d8e7;
+  font-size: clamp(20px, 2.4vw, 34px);
+  font-weight: 700;
+}

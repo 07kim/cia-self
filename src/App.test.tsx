@@ -80,12 +80,16 @@ describe('self checkout', () => {
     expect(screen.getByRole('button', { name: '日本語に切り替える' })).toBeVisible()
   })
 
-  it('does not return home automatically while the checkout is open', () => {
+  it('shows an idle warning and returns home after the warning period', () => {
     vi.useFakeTimers()
     render(<App />)
     fireEvent.click(screen.getByRole('button', { name: 'お会計を始める' }))
-    act(() => vi.advanceTimersByTime(180_000))
+    act(() => vi.advanceTimersByTime(15_000))
+    expect(screen.getByRole('status')).toHaveTextContent('ホーム画面に戻ります')
+    act(() => vi.advanceTimersByTime(9_999))
     expect(screen.getByRole('heading', { name: 'ポイントカード' })).toBeInTheDocument()
+    act(() => vi.advanceTimersByTime(1))
+    expect(screen.getByRole('heading', { name: 'CIA MART 会計端末' })).toBeInTheDocument()
     vi.useRealTimers()
   })
 
