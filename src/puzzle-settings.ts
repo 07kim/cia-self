@@ -1,3 +1,5 @@
+import defaultPuzzleImageUrl from './assets/default-puzzle-self-checkout.png'
+
 export type PuzzleSettings = {
   password: string
   imageDataUrl?: string | null
@@ -6,8 +8,8 @@ export type PuzzleSettings = {
 
 export const DEFAULT_PUZZLE_SETTINGS: PuzzleSettings = {
   password: 'セルフレジ',
-  imageDataUrl: null,
-  imageName: null,
+  imageDataUrl: defaultPuzzleImageUrl,
+  imageName: 'セルフレジ.png',
 }
 
 export const PUZZLE_SETTINGS_STORAGE_KEY = 'cia-self:puzzle-settings:v1'
