@@ -897,16 +897,19 @@ button { cursor: pointer; }
 .largeText .checkoutGrid { font-size: 1.08em; }
 
 .lock { height: 100dvh; min-height: 0; display: grid; place-items: center; overflow: hidden; padding: max(24px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left)); background: #edf2f6; }
-.lockcard { width: min(980px, 100%); display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(320px, .8fr); gap: 28px; padding: clamp(28px, 5vw, 48px); border: 1px solid var(--line); border-radius: 22px; background: #fff; box-shadow: 0 24px 70px #20384f26; }
-.lockPuzzleImage { width: 100%; max-height: 58vh; align-self: center; object-fit: contain; border: 1px solid #d7dee5; background: #f7f9fa; }
+.lockcard { width: min(1180px, 100%); display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(360px, .8fr); gap: clamp(24px, 4vw, 48px); padding: clamp(24px, 4vw, 44px); border: 1px solid var(--line); border-radius: 22px; background: #fff; box-shadow: 0 24px 70px #20384f26; }
+.lockPuzzleImage { width: 100%; aspect-ratio: 297 / 210; max-height: 62vh; align-self: center; object-fit: contain; border: 1px solid #d7dee5; background: #f7f9fa; }
 .lockAuth { min-width: 0; display: grid; align-content: center; gap: 16px; }
 .lockAuth > span { color: var(--blue); font-weight: 700; }
 .lockAuth h1 { margin: 6px 0 0; }
 .lockAuth .answerGuide { margin: -6px 0 2px; color: #607385; font-size: 14px; }
 .lockAuth input { min-width: 0; padding: 18px; border: 2px solid #c1ced9; border-radius: 10px; font-size: 20px; }
 .virtualKeyboard { display: grid; gap: 7px; padding-top: 2px; user-select: none; }
-.keyboardModes, .keyboardRow, .keyboardActions { display: flex; gap: 6px; justify-content: center; }
-.virtualKeyboard button { min-height: 42px; flex: 1; padding: 8px 6px; border: 1px solid #c7d3dc; border-radius: 7px; background: #f4f7f9; color: #24394d; font-weight: 700; box-shadow: 0 1px 0 #d4dde4; }
+.keyboardModes, .keyboardActions { display: flex; gap: 6px; justify-content: center; }
+.keyboardRow { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: clamp(4px, .7vw, 8px); }
+.keyboardRow:nth-child(3) { padding-inline: 5%; }
+.keyboardRow:nth-child(4) { padding-inline: 15%; }
+.virtualKeyboard button { min-width: 0; min-height: clamp(34px, 5.5vh, 52px); padding: 8px 4px; border: 1px solid #c7d3dc; border-radius: 7px; background: #f4f7f9; color: #24394d; font-weight: 700; box-shadow: 0 1px 0 #d4dde4; }
 .virtualKeyboard .keyboardModes button { min-height: 36px; flex: 0 1 130px; color: #5c7080; }
 .virtualKeyboard .keyboardModes button.active { background: var(--blue); color: #fff; border-color: var(--blue); }
 .virtualKeyboard .keyboardActions button { min-height: 38px; background: #fff; }
