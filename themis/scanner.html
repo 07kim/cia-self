@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#111717">
+<title>THEMIS | QRリーダー</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,-apple-system,"Noto Sans JP",sans-serif;background:#111717;color:#f1f4f3}
+*{box-sizing:border-box}body{margin:0}main{max-width:540px;margin:auto;padding:20px 16px 42px}
+header{border-bottom:1px solid #586661;padding:0 0 14px;font-weight:800;font-size:23px;letter-spacing:.12em}
+h1{font-size:21px;margin:26px 0 12px}p{color:#b9c7c3;line-height:1.7}
+.status{padding:13px;border-left:3px solid #93b4a5;background:#1a2621;margin:16px 0;overflow-wrap:anywhere}
+.error{border-color:#c96f66;background:#342120}
+button{display:block;width:100%;min-height:52px;padding:12px;border:0;border-radius:3px;background:#d8e7e0;color:#11231b;font-size:16px;font-weight:700;cursor:pointer;margin:14px 0}
+.secondary{background:#24302c;color:#eef4f0;border:1px solid #5c6c64}
+#reader{width:100%;min-height:250px;border:1px solid #435149;margin-top:18px}
+#reader video{max-width:100%;object-fit:cover}
+.tiny{font-size:13px;color:#99aaa1}
+#result{overflow-wrap:anywhere;border:1px solid #586661;padding:13px;margin-top:20px}
+.hidden{display:none}
+</style>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js" defer></script>
+</head>
+<body>
+<main>
+<header>THEMIS</header>
+<h1>問題のQRコードを読み取る</h1>
+<p>カメラをQRコードに向けると自動で読み取ります。写真を撮る必要はありません。</p>
+<div id="status" class="status" role="status" aria-live="polite">カメラを準備しています…</div>
+<div id="reader"></div>
+<button id="retry" class="secondary hidden" type="button">もう一度読み取る</button>
+<div id="result" class="hidden">
+<strong>読み取り完了</strong>
+<p>元のTHEMIS画面に戻って「ヒントを確認する」を押してください。</p>
+<button id="back" type="button">THEMISに戻る</button>
+<p class="tiny">元の画面に自動で反映されない場合は、読み取ったURLをコピーして入力してください。</p>
+<p id="decoded" class="tiny"></p>
+<button id="copy" class="secondary" type="button">読み取り結果をコピー</button>
+</div>
+<p class="tiny">カメラ映像はQRコードの読み取りだけに使い、このページでは保存しません。カメラの許可を求められたら「許可」を選んでください。</p>
+</main>
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+let reader = null, busy = false, scanned = false, lastValue = '';
+function status(text, isError=false){$('status').textContent=text;$('status').className='status'+(isError?' error':'');}
+async function stop(){
+  if(!reader)return;
+  const current=reader;reader=null;
+  try{if(current.isScanning)await current.stop();}catch(e){}
+  try{current.clear();}catch(e){}
+}
+async function start(){
+  if(busy)return;
+  busy=true;scanned=false;lastValue='';
+  $('retry').classList.add('hidden');
+  $('result').classList.add('hidden');
+  $('decoded').textContent='';
+  status('カメラを起動しています…');
+  try{
+    if(typeof Html5Qrcode==='undefined')throw new Error('QRリーダーを読み込めませんでした。');
+    await stop();
+    reader=new Html5Qrcode('reader',{verbose:false});
+    await reader.start(
+      {facingMode:'environment'},
+      {fps:10,qrbox:(w,h)=>{const side=Math.max(150,Math.min(260,Math.floor(Math.min(w,h)*.78)));return {width:side,height:side};}},
+      async value=>{
+        if(scanned)return;
+        const candidate=String(value).trim();
+        if(!/^https:\/\/[^\s]+$/i.test(candidate)||candidate.length>4096){
+          status('ヒントURLではないQRコードです。別のコードを映してください。',true);
+          return;
+        }
+        scanned=true;lastValue=candidate;
+        await stop();
+        $('retry').classList.remove('hidden');
+        $('result').classList.remove('hidden');
+        $('decoded').textContent=lastValue;
+        status('読み取り成功。THEMISの画面に結果を送りました。');
+        if(window.opener&&!window.opener.closed){
+          window.opener.postMessage({type:'THEMIS_QR_SCANNED',value:lastValue},'*');
+        }
+      },
+      ()=>{}
+    );
+    status('カメラをQRコードに向けてください。');
+  }catch(e){
+    status('カメラを開始できませんでした。ChromeやSafariで開いてカメラを許可してください。詳細：'+(e&&e.message?e.message:String(e)),true);
+    $('retry').classList.remove('hidden');
+  }finally{busy=false;}
+}
+$('retry').addEventListener('click',start);
+$('back').addEventListener('click',()=>{
+  if(window.opener&&!window.opener.closed){window.opener.focus();window.close();}
+  else status('元のTHEMISのタブに戻ってください。');
+});
+$('copy').addEventListener('click',async()=>{
+  try{await navigator.clipboard.writeText(lastValue);status('URLをコピーしました。');}
+  catch(e){status('コピーできませんでした。下に表示されたURLを長押ししてコピーしてください。',true);}
+});
+window.addEventListener('pagehide',()=>{void stop();});
+window.addEventListener('load',start);
+</script>
+</body>
+</html>
